@@ -3,977 +3,1023 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Solana Token Creator</title>
+<title>Solana Token Creator — Free SPL Token Maker</title>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-:root{--g:#00FFA3;--gd:#00CC82;--bg:#0A0E1A;--card:#141824;--inp:#0d1120;--t1:#fff;--t2:#A0AEC0;--t3:#4A5568;--br:#2D3748;--err:#FF6B6B;--warn:#F6AD55}
-body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--t1);min-height:100vh;line-height:1.6}
+:root{
+  --g:#00FFA3;--gd:#00CC82;--bg:#0A0E1A;--card:#141824;
+  --inp:#0d1120;--t1:#fff;--t2:#A0AEC0;--t3:#4A5568;
+  --br:#2D3748;--err:#FF6B6B;--warn:#F6AD55
+}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--t1);min-height:100vh}
 /* HEADER */
-.hdr{position:sticky;top:0;z-index:99;background:rgba(10,14,26,.98);backdrop-filter:blur(14px);border-bottom:1px solid var(--br);padding:.85rem 2rem;display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap}
-.logo{font-size:1.3rem;font-weight:800;color:var(--g);display:flex;align-items:center;gap:.5rem;cursor:pointer;user-select:none}
-.logo-box{width:32px;height:32px;background:linear-gradient(135deg,var(--g),var(--gd));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1rem}
-.nav{display:flex;gap:1.4rem}
-.nav a{color:var(--t2);font-weight:500;font-size:.88rem;cursor:pointer;text-decoration:none;transition:color .2s}
-.nav a:hover,.nav a.active{color:var(--g)}
-.hdr-r{display:flex;align-items:center;gap:.7rem;flex-wrap:wrap}
-.net-wrap{display:flex;background:var(--card);border:1px solid var(--br);border-radius:10px;padding:3px;gap:2px}
-.net{padding:.35rem .9rem;border:none;background:transparent;color:var(--t2);font-weight:600;font-size:.8rem;font-family:inherit;border-radius:7px;cursor:pointer;transition:all .2s}
-.net.on{background:linear-gradient(135deg,var(--g),var(--gd));color:#0A0E1A}
-.wbtn{padding:.55rem 1.25rem;background:linear-gradient(135deg,var(--g),var(--gd));color:#0A0E1A;border:none;border-radius:10px;font-family:inherit;font-weight:700;font-size:.88rem;cursor:pointer;transition:all .2s;white-space:nowrap}
-.wbtn:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(0,255,163,.3)}
-.wbtn.connected{background:var(--card);color:var(--g);border:1px solid var(--g);box-shadow:none}
-/* NOTICE BANNER */
-.notice{background:rgba(246,173,85,.07);border:1px solid rgba(246,173,85,.4);border-radius:12px;padding:1rem 1.25rem;margin-bottom:2rem;font-size:.87rem;color:var(--warn);line-height:1.65;display:none}
-.notice.show{display:block}
-.notice code{background:rgba(0,0,0,.3);padding:.1rem .35rem;border-radius:4px;font-size:.82rem}
+.hdr{position:sticky;top:0;z-index:99;background:rgba(10,14,26,.98);backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--br);padding:.85rem 2rem;display:flex;
+  justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap}
+.logo{font-size:1.25rem;font-weight:800;color:var(--g);display:flex;align-items:center;
+  gap:.5rem;cursor:pointer;user-select:none;text-decoration:none}
+.logo-box{width:30px;height:30px;background:linear-gradient(135deg,var(--g),var(--gd));
+  border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:.95rem}
+.nav{display:flex;gap:1.3rem}
+.nav button{background:none;border:none;color:var(--t2);font-weight:500;font-size:.86rem;
+  font-family:inherit;cursor:pointer;padding:0;transition:color .15s}
+.nav button:hover{color:var(--g)}
+.hdr-right{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap}
+.net-wrap{display:flex;background:var(--card);border:1px solid var(--br);border-radius:9px;padding:3px}
+.net-btn{padding:.32rem .85rem;border:none;background:transparent;color:var(--t2);
+  font-weight:600;font-size:.78rem;font-family:inherit;border-radius:6px;cursor:pointer;transition:all .2s}
+.net-btn.active{background:linear-gradient(135deg,var(--g),var(--gd));color:#0A0E1A}
+.wallet-btn{padding:.52rem 1.2rem;background:linear-gradient(135deg,var(--g),var(--gd));
+  color:#0A0E1A;border:none;border-radius:9px;font-family:inherit;font-weight:700;
+  font-size:.86rem;cursor:pointer;transition:all .2s;white-space:nowrap}
+.wallet-btn:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 3px 12px rgba(0,255,163,.3)}
+.wallet-btn.connected{background:var(--card);color:var(--g);border:1px solid var(--g)}
+.wallet-btn:disabled{opacity:.6;cursor:not-allowed}
 /* PAGE */
-.page{max-width:1180px;margin:0 auto;padding:2.5rem 1.5rem 6rem}
-.hero{text-align:center;margin-bottom:3rem}
-.hero h1{font-size:clamp(1.9rem,5vw,3rem);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--g));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.2;margin-bottom:.8rem}
-.hero p{color:var(--t2);font-size:1rem;max-width:560px;margin:0 auto}
-.tabs{display:flex;gap:.5rem;background:var(--card);border:1px solid var(--br);border-radius:14px;padding:.35rem;margin-bottom:2rem;flex-wrap:wrap}
-.tab{flex:1;min-width:120px;padding:.65rem 1rem;border:none;background:transparent;color:var(--t2);font-family:inherit;font-weight:600;font-size:.88rem;cursor:pointer;border-radius:10px;transition:all .2s;text-align:center}
-.tab.on{background:linear-gradient(135deg,var(--g),var(--gd));color:#0A0E1A}
+.page{max-width:1150px;margin:0 auto;padding:2.5rem 1.5rem 6rem}
+.hero{text-align:center;margin-bottom:2.5rem}
+.hero h1{font-size:clamp(1.8rem,4.5vw,2.9rem);font-weight:800;line-height:1.2;margin-bottom:.7rem;
+  background:linear-gradient(135deg,#fff 20%,var(--g));-webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;background-clip:text}
+.hero p{color:var(--t2);font-size:.97rem;max-width:520px;margin:0 auto}
+/* TABS */
+.tabs{display:flex;gap:.35rem;background:var(--card);border:1px solid var(--br);
+  border-radius:13px;padding:.28rem;margin-bottom:1.75rem;flex-wrap:wrap}
+.tab{flex:1;min-width:100px;padding:.58rem .6rem;border:none;background:transparent;
+  color:var(--t2);font-family:inherit;font-weight:600;font-size:.81rem;cursor:pointer;
+  border-radius:9px;transition:all .18s;white-space:nowrap}
+.tab.active{background:linear-gradient(135deg,var(--g),var(--gd));color:#0A0E1A}
 /* PANELS */
-.panel{display:none}.panel.on{display:block}
-.pgrid{display:grid;grid-template-columns:1fr 300px;gap:1.5rem;align-items:start}
-@media(max-width:840px){.pgrid{grid-template-columns:1fr}.sidebar{order:-1}.nav{display:none}.tab{font-size:.8rem;padding:.55rem .5rem}}
-/* CARDS */
-.card{background:var(--card);border:1px solid var(--br);border-radius:18px;padding:1.6rem}
-.card-h{font-size:1.15rem;font-weight:700;margin-bottom:.25rem}
-.card-sub{color:var(--t2);font-size:.85rem;margin-bottom:1.4rem}
-/* FORMS */
-.fld{margin-bottom:1rem}
-.fld label{display:block;font-weight:600;font-size:.85rem;margin-bottom:.35rem}
-.fld small{display:block;color:var(--t3);font-size:.76rem;margin-top:.2rem}
+.panel{display:none}.panel.active{display:block}
+/* LAYOUT */
+.two-col{display:grid;grid-template-columns:1fr 290px;gap:1.4rem;align-items:start}
+.sticky-side{position:sticky;top:74px}
+@media(max-width:820px){.two-col{grid-template-columns:1fr}.sticky-side{position:static}
+  .nav{display:none}.tab{font-size:.74rem;padding:.48rem .35rem;min-width:80px}}
+/* CARD */
+.card{background:var(--card);border:1px solid var(--br);border-radius:16px;padding:1.5rem}
+.card-title{font-size:1.1rem;font-weight:700;margin-bottom:.22rem}
+.card-desc{color:var(--t2);font-size:.83rem;margin-bottom:1.35rem;line-height:1.5}
+/* FORM */
+.field{margin-bottom:.95rem}
+.field label{display:block;font-weight:600;font-size:.82rem;margin-bottom:.3rem;color:var(--t1)}
+.field small{display:block;color:var(--t3);font-size:.73rem;margin-top:.17rem}
 .req{color:var(--err)}
-input[type=text],input[type=number],textarea,select{width:100%;padding:.7rem .95rem;background:var(--inp);border:1px solid var(--br);border-radius:10px;color:var(--t1);font-family:inherit;font-size:.9rem;outline:none;transition:border-color .2s}
-input:focus,textarea:focus,select:focus{border-color:var(--g)}
-textarea{resize:vertical;min-height:80px}
+input,textarea,select{width:100%;padding:.66rem .9rem;background:var(--inp);
+  border:1px solid var(--br);border-radius:9px;color:var(--t1);font-family:inherit;
+  font-size:.88rem;outline:none;transition:border-color .18s;line-height:1.5}
+input:focus,textarea:focus{border-color:var(--g)}
+textarea{resize:vertical;min-height:76px}
 /* UPLOAD */
-.upbox{border:2px dashed var(--br);border-radius:10px;padding:1.4rem;text-align:center;background:var(--inp);transition:all .2s;position:relative;cursor:pointer}
-.upbox:hover,.upbox.drag{border-color:var(--g);background:rgba(0,255,163,.03)}
-.upbox input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
-.up-ico{font-size:1.7rem;margin-bottom:.3rem;pointer-events:none}
-.up-hint{color:var(--t2);font-size:.83rem;pointer-events:none}
-.up-note{color:var(--t3);font-size:.75rem;margin-top:.2rem;pointer-events:none}
-.prev-wrap{margin-top:.65rem;display:none}
-.prev-wrap img{max-width:110px;max-height:110px;border-radius:10px;border:1px solid var(--br);display:block}
-/* TOGGLE */
-.adv-btn{width:100%;padding:.6rem;background:transparent;border:1px solid var(--br);border-radius:10px;color:var(--t2);font-family:inherit;font-weight:600;font-size:.84rem;cursor:pointer;margin:.85rem 0;transition:all .2s}
-.adv-btn:hover{border-color:var(--g);color:var(--g)}
-.adv-body{display:none}.adv-body.open{display:block}
-.trow{display:flex;align-items:center;justify-content:space-between;padding:.75rem .95rem;background:var(--inp);border-radius:10px;margin-bottom:.55rem}
-.trow-l{font-weight:600;font-size:.85rem}
-.trow-d{color:var(--t3);font-size:.75rem;margin-top:.08rem}
-.sw{position:relative;width:46px;height:24px;flex-shrink:0}
+.upload{border:2px dashed var(--br);border-radius:9px;padding:1.3rem;text-align:center;
+  background:var(--inp);position:relative;cursor:pointer;transition:all .18s}
+.upload:hover,.upload.over{border-color:var(--g);background:rgba(0,255,163,.03)}
+.upload input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.upload-icon{font-size:1.6rem;margin-bottom:.28rem;pointer-events:none}
+.upload-text{color:var(--t2);font-size:.8rem;pointer-events:none}
+.upload-note{color:var(--t3);font-size:.72rem;margin-top:.15rem;pointer-events:none}
+.img-preview{margin-top:.6rem;display:none}
+.img-preview img{max-width:100px;max-height:100px;border-radius:9px;border:1px solid var(--br)}
+/* TOGGLES */
+.show-adv{width:100%;padding:.55rem;background:transparent;border:1px solid var(--br);
+  border-radius:9px;color:var(--t2);font-family:inherit;font-weight:600;font-size:.8rem;
+  cursor:pointer;margin:.75rem 0;transition:all .18s}
+.show-adv:hover{border-color:var(--g);color:var(--g)}
+.adv-section{display:none}.adv-section.open{display:block}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;
+  padding:.7rem .9rem;background:var(--inp);border-radius:9px;margin-bottom:.5rem}
+.toggle-label{font-weight:600;font-size:.82rem}
+.toggle-desc{color:var(--t3);font-size:.72rem;margin-top:.06rem}
+.sw{position:relative;width:44px;height:23px;flex-shrink:0}
 .sw input{opacity:0;width:0;height:0;position:absolute}
-.track{position:absolute;inset:0;background:var(--br);border-radius:24px;transition:background .3s;cursor:pointer}
-.track::before{content:'';position:absolute;width:16px;height:16px;background:#fff;border-radius:50%;top:4px;left:4px;transition:transform .3s}
-.sw input:checked+.track{background:var(--g)}
-.sw input:checked+.track::before{transform:translateX(22px)}
+.sw-track{position:absolute;inset:0;background:var(--br);border-radius:23px;
+  cursor:pointer;transition:background .25s}
+.sw-track:before{content:'';position:absolute;width:15px;height:15px;background:#fff;
+  border-radius:50%;top:4px;left:4px;transition:transform .25s}
+.sw input:checked+.sw-track{background:var(--g)}
+.sw input:checked+.sw-track:before{transform:translateX(21px)}
 /* BUTTONS */
-.cbtn{width:100%;padding:.88rem;background:linear-gradient(135deg,var(--g),var(--gd));color:#0A0E1A;border:none;border-radius:12px;font-family:inherit;font-size:.93rem;font-weight:700;cursor:pointer;margin-top:.5rem;transition:all .2s}
-.cbtn:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 4px 16px rgba(0,255,163,.35)}
-.cbtn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.btn{width:100%;padding:.84rem;background:linear-gradient(135deg,var(--g),var(--gd));
+  color:#0A0E1A;border:none;border-radius:11px;font-family:inherit;font-size:.9rem;
+  font-weight:700;cursor:pointer;margin-top:.45rem;transition:all .18s}
+.btn:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 4px 14px rgba(0,255,163,.3)}
+.btn:disabled{opacity:.38;cursor:not-allowed;transform:none}
 /* SIDEBAR */
-.sidebar{position:sticky;top:78px}
-.sum-row{display:flex;justify-content:space-between;padding:.55rem 0;border-bottom:1px solid var(--br);font-size:.85rem}
-.sum-row:last-child{border:none}
-.sum-row span:first-child{color:var(--t2)}
-.sum-row span:last-child{font-weight:600}
-.sum-row.big span:last-child{color:var(--g);font-size:1.05rem}
-/* STATUS */
-.sts{padding:.8rem .95rem;border-radius:10px;margin:.7rem 0;font-size:.84rem;display:none;line-height:1.6;word-break:break-all}
-.sts.show{display:block}
-.sts.ok{background:rgba(0,255,163,.07);border:1px solid var(--g);color:var(--g)}
-.sts.er{background:rgba(255,107,107,.07);border:1px solid var(--err);color:var(--err)}
-.sts.fo{background:rgba(246,173,85,.07);border:1px solid var(--warn);color:var(--warn)}
+.summary-row{display:flex;justify-content:space-between;padding:.5rem 0;
+  border-bottom:1px solid var(--br);font-size:.83rem}
+.summary-row:last-child{border:none}
+.summary-row span:first-child{color:var(--t2)}
+.summary-row span:last-child{font-weight:600}
+.summary-row.highlight span:last-child{color:var(--g)}
+/* STATUS MESSAGES */
+.status{padding:.75rem .9rem;border-radius:9px;margin:.65rem 0;font-size:.82rem;
+  display:none;line-height:1.6;word-break:break-all}
+.status.show{display:block}
+.status.success{background:rgba(0,255,163,.07);border:1px solid var(--g);color:var(--g)}
+.status.error{background:rgba(255,107,107,.07);border:1px solid var(--err);color:var(--err)}
+.status.info{background:rgba(246,173,85,.07);border:1px solid var(--warn);color:var(--warn)}
 /* DIVIDER */
-.div{height:1px;background:var(--br);margin:1.3rem 0}
-/* RECIPIENT ROWS */
-.recip-row{display:grid;grid-template-columns:1fr 120px auto;gap:.45rem;align-items:center;margin-bottom:.45rem}
+hr.div{border:none;border-top:1px solid var(--br);margin:1.2rem 0}
+/* RECIPIENTS */
+.recip-row{display:grid;grid-template-columns:1fr 110px 36px;gap:.38rem;
+  align-items:center;margin-bottom:.38rem}
 .recip-row input{margin:0}
-.delbtn{padding:.5rem .65rem;background:rgba(255,107,107,.1);border:1px solid var(--err);border-radius:8px;color:var(--err);cursor:pointer;font-size:.78rem;font-family:inherit;transition:all .2s;white-space:nowrap}
-.delbtn:hover{background:rgba(255,107,107,.18)}
-.addbtn{padding:.5rem .95rem;background:transparent;border:1px solid var(--br);border-radius:8px;color:var(--t2);cursor:pointer;font-size:.82rem;font-family:inherit;transition:all .2s;margin-top:.2rem}
-.addbtn:hover{border-color:var(--g);color:var(--g)}
-/* PROFILE GRID */
-.prof-img-grid{display:grid;grid-template-columns:1fr 1fr;gap:.9rem;margin-bottom:1rem}
-@media(max-width:500px){.prof-img-grid{grid-template-columns:1fr}}
+.del-btn{padding:.5rem;background:rgba(255,107,107,.1);border:1px solid var(--err);
+  border-radius:7px;color:var(--err);cursor:pointer;font-size:.75rem;font-family:inherit;
+  transition:all .18s;width:100%;text-align:center}
+.del-btn:hover{background:rgba(255,107,107,.18)}
+.add-recip{padding:.45rem .85rem;background:transparent;border:1px solid var(--br);
+  border-radius:7px;color:var(--t2);cursor:pointer;font-size:.78rem;font-family:inherit;
+  transition:all .18s;margin-top:.18rem}
+.add-recip:hover{border-color:var(--g);color:var(--g)}
+/* PROFILE IMAGES GRID */
+.img-grid{display:grid;grid-template-columns:1fr 1fr;gap:.85rem;margin-bottom:.95rem}
+@media(max-width:480px){.img-grid{grid-template-columns:1fr}}
 /* STEPS */
-.steps{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:.95rem}
-.step{background:var(--card);border:1px solid var(--br);border-radius:13px;padding:1.2rem;transition:all .2s}
-.step:hover{border-color:var(--g);transform:translateY(-2px)}
-.step-n{width:34px;height:34px;background:linear-gradient(135deg,var(--g),var(--gd));color:#0A0E1A;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.95rem;margin-bottom:.65rem}
-.step h4{font-size:.88rem;margin-bottom:.22rem}
-.step p{color:var(--t2);font-size:.76rem}
+.steps-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:.85rem}
+.step-card{background:var(--card);border:1px solid var(--br);border-radius:12px;
+  padding:1.15rem;transition:all .18s}
+.step-card:hover{border-color:var(--g);transform:translateY(-2px)}
+.step-num{width:32px;height:32px;background:linear-gradient(135deg,var(--g),var(--gd));
+  color:#0A0E1A;border-radius:7px;display:flex;align-items:center;justify-content:center;
+  font-weight:800;font-size:.88rem;margin-bottom:.6rem}
+.step-card h4{font-size:.85rem;margin-bottom:.2rem}
+.step-card p{color:var(--t2);font-size:.74rem;line-height:1.5}
 /* FAQ */
-.faq-item{background:var(--card);border:1px solid var(--br);border-radius:11px;margin-bottom:.55rem;overflow:hidden}
-.faq-q{padding:.9rem 1.1rem;cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-weight:600;font-size:.88rem;user-select:none;transition:color .2s}
+.faq{background:var(--card);border:1px solid var(--br);border-radius:10px;
+  margin-bottom:.5rem;overflow:hidden}
+.faq-q{padding:.85rem 1.05rem;cursor:pointer;display:flex;justify-content:space-between;
+  align-items:center;font-weight:600;font-size:.86rem;user-select:none;transition:color .18s}
 .faq-q:hover{color:var(--g)}
-.faq-ic{color:var(--g);font-size:1rem;transition:transform .3s;flex-shrink:0;margin-left:.5rem}
-.faq-item.open .faq-ic{transform:rotate(45deg)}
-.faq-a{max-height:0;overflow:hidden;padding:0 1.1rem;color:var(--t2);font-size:.83rem;transition:max-height .3s ease,padding .3s ease}
-.faq-item.open .faq-a{max-height:300px;padding:0 1.1rem 1.1rem}
-.faq-a code{background:var(--inp);padding:.1rem .3rem;border-radius:4px;font-size:.79rem}
+.faq-icon{color:var(--g);transition:transform .25s;flex-shrink:0;margin-left:.4rem;font-size:.95rem}
+.faq.open .faq-icon{transform:rotate(45deg)}
+.faq-a{max-height:0;overflow:hidden;padding:0 1.05rem;color:var(--t2);
+  font-size:.8rem;line-height:1.65;transition:max-height .28s ease,padding .28s ease}
+.faq.open .faq-a{max-height:250px;padding:0 1.05rem 1.05rem}
+.faq-a code{background:var(--inp);padding:.08rem .28rem;border-radius:4px;font-size:.76rem}
+/* LOADING */
+.lib-loading{text-align:center;padding:3rem 1.5rem;color:var(--t2)}
+.lib-loading .spinner{display:inline-block;font-size:2rem;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.lib-loading p{margin-top:.75rem;font-size:.9rem}
+.lib-error{text-align:center;padding:2.5rem 1.5rem;color:var(--err)}
 /* FOOTER */
-footer{background:var(--card);border-top:1px solid var(--br);padding:1.75rem;text-align:center;margin-top:5rem}
-.ft-links{display:flex;justify-content:center;gap:1.5rem;flex-wrap:wrap;margin-bottom:.65rem}
-.ft-links a{color:var(--t2);font-size:.84rem;cursor:pointer;text-decoration:none;transition:color .2s}
-.ft-links a:hover{color:var(--g)}
-.ft-c{color:var(--t3);font-size:.76rem}
-/* CHIP */
-.chip{display:inline-block;background:var(--inp);border:1px solid var(--br);border-radius:6px;padding:.12rem .42rem;font-size:.75rem;cursor:pointer;margin-left:.3rem;transition:all .2s;vertical-align:middle}
-.chip:hover{border-color:var(--g);color:var(--g)}
-a.expl{color:var(--g);font-size:.79rem;text-decoration:none;display:inline-block;margin-top:.3rem}
-pre.meta{background:var(--inp);padding:.75rem;border-radius:8px;font-size:.74rem;overflow-x:auto;white-space:pre-wrap;border:1px solid var(--br);margin:.5rem 0;color:var(--t2)}
+footer{background:var(--card);border-top:1px solid var(--br);padding:1.6rem;text-align:center}
+.footer-links{display:flex;justify-content:center;gap:1.3rem;flex-wrap:wrap;margin-bottom:.6rem}
+.footer-links button{background:none;border:none;color:var(--t2);font-size:.82rem;
+  cursor:pointer;font-family:inherit;transition:color .18s}
+.footer-links button:hover{color:var(--g)}
+.footer-copy{color:var(--t3);font-size:.74rem}
+/* MISC */
+.copy-chip{display:inline-block;background:var(--inp);border:1px solid var(--br);
+  border-radius:5px;padding:.1rem .4rem;font-size:.73rem;cursor:pointer;
+  margin-left:.28rem;transition:all .18s;vertical-align:middle}
+.copy-chip:hover{border-color:var(--g);color:var(--g)}
+a.view-link{color:var(--g);font-size:.77rem;text-decoration:none;display:inline-block;margin-top:.28rem}
+pre.json-block{background:var(--inp);padding:.65rem;border-radius:7px;font-size:.7rem;
+  overflow-x:auto;white-space:pre-wrap;border:1px solid var(--br);margin:.45rem 0;color:var(--t2);
+  max-height:240px;overflow-y:auto}
+section.sec-wrap{margin-top:0}
+.sec-header{text-align:center;margin-bottom:1.75rem}
+.sec-header h2{font-size:1.45rem;font-weight:800;margin-bottom:.35rem}
+.sec-header p{color:var(--t2);font-size:.9rem}
 </style>
 </head>
 <body>
 
-<!-- ░░ HEADER ░░ -->
 <header class="hdr">
-  <div class="logo" id="logoBtn"><div class="logo-box">⚡</div>Solana Token Creator</div>
+  <a class="logo" id="goHome"><div class="logo-box">⚡</div>Solana Token Creator</a>
   <nav class="nav">
-    <a id="navCreate">Create Token</a>
-    <a id="navSend">Send Tokens</a>
-    <a id="navProfile">Token Profile</a>
-    <a id="navLiq">Liquidity</a>
-    <a id="navHow">How to Use</a>
-    <a id="navFaq">FAQ</a>
+    <button data-tab="create">Create Token</button>
+    <button data-tab="send">Send Tokens</button>
+    <button data-tab="profile">Token Profile</button>
+    <button data-tab="liquidity">Liquidity</button>
+    <button data-tab="how">How to Use</button>
+    <button data-tab="faq">FAQ</button>
   </nav>
-  <div class="hdr-r">
+  <div class="hdr-right">
     <div class="net-wrap">
-      <button class="net on" id="devBtn">Devnet</button>
-      <button class="net" id="mainBtn">Mainnet</button>
+      <button class="net-btn active" id="btn-devnet">Devnet</button>
+      <button class="net-btn" id="btn-mainnet">Mainnet</button>
     </div>
-    <button class="wbtn" id="walletBtn">Connect Wallet</button>
+    <button class="wallet-btn" id="walletBtn">Connect Wallet</button>
   </div>
 </header>
 
 <main class="page">
-  <section class="hero" id="heroSec">
+
+  <div class="hero">
     <h1>Solana Token Creator</h1>
-    <p>Create tokens, send to wallets, update your token profile, and add liquidity — all for free.</p>
-  </section>
-
-  <!-- FILE:// WARNING -->
-  <div class="notice" id="fileNotice">
-    ⚠️ <strong>Phantom won't connect on <code>file://</code> pages.</strong> You are opening this as a local file. Fix it in 30 seconds:<br><br>
-    <strong>Option A (easiest):</strong> In Chrome go to <code>chrome://extensions</code> → find Phantom → click <strong>Details</strong> → turn on <strong>"Allow access to file URLs"</strong> → refresh this page.<br><br>
-    <strong>Option B:</strong> Install Node.js, open a terminal in the folder with this file, run <code>npx serve .</code> then open <code>http://localhost:3000</code>
+    <p>Create tokens, send to wallets, and update your token profile. No service fees — you only pay the unavoidable Solana network fee.</p>
   </div>
 
-  <!-- ░░ TABS ░░ -->
-  <div class="tabs">
-    <button class="tab on" id="tab-create">🪙 Create Token</button>
-    <button class="tab" id="tab-send">📤 Send Tokens</button>
-    <button class="tab" id="tab-profile">🎨 Token Profile</button>
-    <button class="tab" id="tab-liq">💧 Liquidity</button>
-    <button class="tab" id="tab-how">📖 How to Use</button>
-    <button class="tab" id="tab-faq">❓ FAQ</button>
+  <!-- Loading state -->
+  <div id="loadingState" class="lib-loading">
+    <div class="spinner">⚙️</div>
+    <p>Loading Solana libraries…</p>
   </div>
 
-  <!-- ░░ PANEL: CREATE TOKEN ░░ -->
-  <div class="panel on" id="panel-create">
-    <div class="pgrid">
-      <div class="card">
-        <div class="card-h">Create Your Token</div>
-        <div class="card-sub">Mint a new SPL token on Solana</div>
-        <div id="createSts" class="sts"></div>
+  <!-- Error state -->
+  <div id="errorState" class="lib-error" style="display:none">
+    <p style="font-size:1.4rem;margin-bottom:.75rem">⚠️</p>
+    <p id="errorMsg"></p>
+    <p style="margin-top:.75rem;font-size:.82rem;color:var(--t2)">Make sure you are connected to the internet and no browser extension is blocking esm.sh, then refresh.</p>
+  </div>
 
-        <div class="fld"><label>Token Name <span class="req">*</span></label><input type="text" id="tName" placeholder="e.g. My Token"></div>
-        <div class="fld"><label>Symbol <span class="req">*</span></label><input type="text" id="tSymbol" maxlength="8" placeholder="e.g. MTK"><small>Max 8 characters</small></div>
-        <div class="fld"><label>Decimals</label><input type="number" id="tDec" value="6" min="0" max="9"><small>Recommended: 6</small></div>
-        <div class="fld"><label>Supply <span class="req">*</span></label><input type="number" id="tSup" placeholder="e.g. 1000000"></div>
-        <div class="fld"><label>Description</label><textarea id="tDesc" placeholder="Describe your token…"></textarea></div>
-        <div class="fld">
-          <label>Token Image</label>
-          <div class="upbox" id="upBox">
-            <div class="up-ico">🖼️</div>
-            <div class="up-hint">Click or drag &amp; drop</div>
-            <div class="up-note">PNG/JPG · max 5 MB</div>
-            <input type="file" id="imgFile" accept="image/*">
-          </div>
-          <div class="prev-wrap" id="prevWrap"><img id="prevImg" alt="preview"></div>
-        </div>
+  <!-- Main app (hidden until libs ready) -->
+  <div id="app" style="display:none">
 
-        <button class="adv-btn" id="advBtn">Show Advanced Options ▼</button>
-        <div class="adv-body" id="advBody">
-          <div class="trow">
-            <div><div class="trow-l">Revoke Freeze Authority</div><div class="trow-d">Required for liquidity pools</div></div>
-            <label class="sw"><input type="checkbox" id="frCk" checked><span class="track"></span></label>
-          </div>
-          <div class="trow">
-            <div><div class="trow-l">Revoke Mint Authority</div><div class="trow-d">Prevents minting more tokens</div></div>
-            <label class="sw"><input type="checkbox" id="miCk"><span class="track"></span></label>
-          </div>
-        </div>
-        <button class="cbtn" id="createBtn" disabled>Connect Wallet to Create Token</button>
-      </div>
+    <div class="tabs" id="tabBar">
+      <button class="tab active" data-tab="create">🪙 Create Token</button>
+      <button class="tab" data-tab="send">📤 Send Tokens</button>
+      <button class="tab" data-tab="profile">🎨 Token Profile</button>
+      <button class="tab" data-tab="liquidity">💧 Liquidity</button>
+      <button class="tab" data-tab="how">📖 How to Use</button>
+      <button class="tab" data-tab="faq">❓ FAQ</button>
+    </div>
 
-      <aside class="sidebar">
+    <!-- ══════════ CREATE TOKEN ══════════ -->
+    <div class="panel active" id="panel-create">
+      <div class="two-col">
         <div class="card">
-          <div class="card-h" style="margin-bottom:.9rem">Summary</div>
-          <div class="sum-row"><span>Wallet</span><span id="sWal">Not connected</span></div>
-          <div class="sum-row"><span>Network</span><span id="sNet">Devnet</span></div>
-          <div class="sum-row"><span>Revoke Freeze</span><span id="sFr">Yes</span></div>
-          <div class="sum-row"><span>Revoke Mint</span><span id="sMi">No</span></div>
-          <div class="sum-row big"><span>Network Fee</span><span>~0.01 SOL</span></div>
+          <div class="card-title">Create Your Token</div>
+          <div class="card-desc">Mint a new SPL token on Solana. Only pay the ~0.01 SOL network fee — zero service fees.</div>
+          <div id="sts-create" class="status"></div>
+
+          <div class="field">
+            <label>Token Name <span class="req">*</span></label>
+            <input type="text" id="c-name" placeholder="e.g. My Awesome Token">
+          </div>
+          <div class="field">
+            <label>Symbol <span class="req">*</span></label>
+            <input type="text" id="c-symbol" placeholder="e.g. MAT" maxlength="8">
+            <small>Max 8 characters</small>
+          </div>
+          <div class="field">
+            <label>Decimals</label>
+            <input type="number" id="c-decimals" value="6" min="0" max="9">
+            <small>Standard is 6. Use 0 for NFT-style tokens.</small>
+          </div>
+          <div class="field">
+            <label>Total Supply <span class="req">*</span></label>
+            <input type="number" id="c-supply" placeholder="e.g. 1000000000">
+          </div>
+          <div class="field">
+            <label>Description</label>
+            <textarea id="c-desc" placeholder="Describe your token…"></textarea>
+          </div>
+          <div class="field">
+            <label>Token Image</label>
+            <div class="upload" id="c-imgbox">
+              <div class="upload-icon">🖼️</div>
+              <div class="upload-text">Click to upload or drag & drop</div>
+              <div class="upload-note">PNG or JPG · max 5 MB</div>
+              <input type="file" id="c-img" accept="image/*">
+            </div>
+            <div class="img-preview" id="c-imgprev"><img id="c-imgel" alt=""></div>
+          </div>
+
+          <button class="show-adv" id="advToggle">⚙️ Show Advanced Options ▼</button>
+          <div class="adv-section" id="advSection">
+            <div class="toggle-row">
+              <div>
+                <div class="toggle-label">Revoke Freeze Authority</div>
+                <div class="toggle-desc">Required to create liquidity pools on Raydium</div>
+              </div>
+              <label class="sw"><input type="checkbox" id="c-freeze" checked><span class="sw-track"></span></label>
+            </div>
+            <div class="toggle-row">
+              <div>
+                <div class="toggle-label">Revoke Mint Authority</div>
+                <div class="toggle-desc">Prevents anyone from minting more tokens</div>
+              </div>
+              <label class="sw"><input type="checkbox" id="c-mint"><span class="sw-track"></span></label>
+            </div>
+          </div>
+
+          <button class="btn" id="createBtn" disabled>Connect Wallet to Create Token</button>
         </div>
-      </aside>
+
+        <aside class="sticky-side">
+          <div class="card">
+            <div class="card-title" style="margin-bottom:.85rem">Summary</div>
+            <div class="summary-row"><span>Wallet</span><span id="sum-wallet">Not connected</span></div>
+            <div class="summary-row"><span>Network</span><span id="sum-net">Devnet</span></div>
+            <div class="summary-row"><span>Revoke Freeze</span><span id="sum-freeze">Yes</span></div>
+            <div class="summary-row"><span>Revoke Mint</span><span id="sum-mint">No</span></div>
+            <div class="summary-row highlight"><span>Service Fee</span><span>FREE</span></div>
+            <div class="summary-row highlight"><span>Network Fee</span><span>~0.01 SOL</span></div>
+          </div>
+        </aside>
+      </div>
     </div>
-  </div>
 
-  <!-- ░░ PANEL: SEND TOKENS ░░ -->
-  <div class="panel" id="panel-send">
-    <div class="card">
-      <div class="card-h">Send Tokens</div>
-      <div class="card-sub">Send your SPL token to one or many wallets at once</div>
-      <div id="sendSts" class="sts"></div>
+    <!-- ══════════ SEND TOKENS ══════════ -->
+    <div class="panel" id="panel-send">
+      <div class="card">
+        <div class="card-title">Send Tokens</div>
+        <div class="card-desc">Send your SPL token to one or many wallet addresses. No service fee — only the Solana network fee per transaction.</div>
+        <div id="sts-send" class="status"></div>
 
-      <div class="fld">
-        <label>Token Mint Address <span class="req">*</span></label>
-        <input type="text" id="sendMint" placeholder="e.g. 7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU">
-        <small>The mint address of the token you want to send</small>
+        <div class="field">
+          <label>Token Mint Address <span class="req">*</span></label>
+          <input type="text" id="s-mint" placeholder="Token mint address (e.g. 7xKXtg…)">
+          <small>The mint address of the token you want to send</small>
+        </div>
+        <div class="field">
+          <label>Token Decimals <span class="req">*</span></label>
+          <input type="number" id="s-decimals" value="6" min="0" max="9">
+          <small>Must match your token's decimals — auto-filled if you just created a token</small>
+        </div>
+
+        <hr class="div">
+
+        <div class="field">
+          <label>Recipients <span class="req">*</span></label>
+          <div id="recipientList">
+            <div class="recip-row">
+              <input type="text" class="r-addr" placeholder="Wallet address">
+              <input type="number" class="r-amt" placeholder="Amount" min="0" step="any">
+              <button class="del-btn" onclick="removeRecipient(this)">✕</button>
+            </div>
+          </div>
+          <button class="add-recip" id="addRecipient">+ Add Recipient</button>
+          <small>Add as many recipients as needed — each gets their own amount</small>
+        </div>
+
+        <button class="btn" id="sendBtn" disabled>Connect Wallet to Send</button>
       </div>
+    </div>
 
-      <div class="fld">
-        <label>Token Decimals</label>
-        <input type="number" id="sendDec" value="6" min="0" max="9">
-        <small>Must match your token's decimals (default 6)</small>
-      </div>
+    <!-- ══════════ TOKEN PROFILE ══════════ -->
+    <div class="panel" id="panel-profile">
+      <div class="card">
+        <div class="card-title">Update Token Profile</div>
+        <div class="card-desc">Build your token's metadata — logo, banner, description and social links. Generates a JSON file for uploading to IPFS.</div>
+        <div id="sts-profile" class="status"></div>
 
-      <div class="div"></div>
+        <div class="field">
+          <label>Token Mint Address <span class="req">*</span></label>
+          <input type="text" id="p-mint" placeholder="Your token mint address">
+        </div>
 
-      <div class="fld">
-        <label>Recipients <span class="req">*</span></label>
-        <div id="recipList">
-          <div class="recip-row">
-            <input type="text" class="raddr" placeholder="Wallet address (public key)">
-            <input type="number" class="ramt" placeholder="Amount" min="0">
-            <button class="delbtn" onclick="delRecip(this)">✕</button>
+        <hr class="div">
+        <p style="font-weight:700;font-size:.9rem;margin-bottom:.85rem">🖼️ Images</p>
+
+        <div class="img-grid">
+          <div class="field" style="margin:0">
+            <label>Token Logo</label>
+            <div class="upload" id="p-logobox">
+              <div class="upload-icon">👤</div>
+              <div class="upload-text">Upload logo</div>
+              <div class="upload-note">PNG · square recommended</div>
+              <input type="file" id="p-logo" accept="image/*">
+            </div>
+            <div class="img-preview" id="p-logoprev"><img id="p-logoimg" alt="" style="border-radius:50%;max-width:80px;max-height:80px"></div>
+          </div>
+          <div class="field" style="margin:0">
+            <label>Banner Image</label>
+            <div class="upload" id="p-bannerbox">
+              <div class="upload-icon">🏞️</div>
+              <div class="upload-text">Upload banner</div>
+              <div class="upload-note">Wide image recommended</div>
+              <input type="file" id="p-banner" accept="image/*">
+            </div>
+            <div class="img-preview" id="p-bannerprev"><img id="p-bannerimg" alt="" style="max-width:100%;max-height:50px;border-radius:6px"></div>
           </div>
         </div>
-        <button class="addbtn" id="addRecipBtn">+ Add Recipient</button>
-        <small>You can send to multiple wallets — each row is one transfer</small>
+
+        <hr class="div">
+        <p style="font-weight:700;font-size:.9rem;margin-bottom:.85rem">📝 Token Info</p>
+
+        <div class="field"><label>Token Name</label><input type="text" id="p-name" placeholder="e.g. My Awesome Token"></div>
+        <div class="field"><label>Symbol</label><input type="text" id="p-symbol" placeholder="e.g. MAT" maxlength="8"></div>
+        <div class="field"><label>Description</label><textarea id="p-desc" placeholder="Describe your token…"></textarea></div>
+
+        <hr class="div">
+        <p style="font-weight:700;font-size:.9rem;margin-bottom:.85rem">🔗 Social Links</p>
+
+        <div class="field"><label>🌐 Website</label><input type="text" id="p-website" placeholder="https://yourtoken.io"></div>
+        <div class="field"><label>𝕏 Twitter / X</label><input type="text" id="p-twitter" placeholder="https://twitter.com/yourtoken"></div>
+        <div class="field"><label>✈️ Telegram</label><input type="text" id="p-telegram" placeholder="https://t.me/yourtoken"></div>
+        <div class="field"><label>💬 Discord</label><input type="text" id="p-discord" placeholder="https://discord.gg/yourtoken"></div>
+        <div class="field"><label>📸 Instagram</label><input type="text" id="p-instagram" placeholder="https://instagram.com/yourtoken"></div>
+
+        <button class="btn" id="profileBtn" disabled>Connect Wallet to Generate Profile</button>
       </div>
-
-      <button class="cbtn" id="sendBtn" disabled>Connect Wallet to Send</button>
     </div>
-  </div>
 
-  <!-- ░░ PANEL: TOKEN PROFILE ░░ -->
-  <div class="panel" id="panel-profile">
-    <div class="card">
-      <div class="card-h">Update Token Profile</div>
-      <div class="card-sub">Set your token's name, description, logo, banner and social links</div>
-      <div id="profSts" class="sts"></div>
-
-      <div class="fld">
-        <label>Token Mint Address <span class="req">*</span></label>
-        <input type="text" id="profMint" placeholder="Your token mint address">
-        <small>The mint address of the token you want to update</small>
+    <!-- ══════════ LIQUIDITY ══════════ -->
+    <div class="panel" id="panel-liquidity">
+      <div class="card">
+        <div class="card-title">Create Liquidity Pool</div>
+        <div class="card-desc">Pair your token with SOL on Raydium to enable open trading. Make sure Freeze Authority is revoked first.</div>
+        <div class="status info show">ℹ️ Freeze Authority must be revoked before creating a liquidity pool on Raydium.</div>
+        <div id="sts-liquidity" class="status"></div>
+        <div class="field"><label>Token Mint Address <span class="req">*</span></label><input type="text" id="l-mint" placeholder="Your token mint address"></div>
+        <div class="field"><label>Token Amount <span class="req">*</span></label><input type="number" id="l-tokens" placeholder="e.g. 500000000"></div>
+        <div class="field"><label>SOL Amount <span class="req">*</span></label><input type="number" id="l-sol" placeholder="e.g. 2.5" step="0.01"></div>
+        <button class="btn" id="liqBtn" disabled>Connect Wallet to Add Liquidity</button>
       </div>
+    </div>
 
-      <div class="div"></div>
-      <p style="font-weight:700;font-size:.95rem;margin-bottom:1rem">Images</p>
-
-      <div class="prof-img-grid">
-        <div class="fld" style="margin:0">
-          <label>Token Logo</label>
-          <div class="upbox" id="logoBox">
-            <div class="up-ico">👤</div>
-            <div class="up-hint">Upload logo</div>
-            <div class="up-note">PNG · square</div>
-            <input type="file" id="logoFile" accept="image/*">
-          </div>
-          <div class="prev-wrap" id="logoPrev"><img id="logoImg" alt="logo" style="border-radius:50%;max-width:90px;max-height:90px"></div>
-        </div>
-        <div class="fld" style="margin:0">
-          <label>Banner Image</label>
-          <div class="upbox" id="bannerBox">
-            <div class="up-ico">🏞️</div>
-            <div class="up-hint">Upload banner</div>
-            <div class="up-note">Wide image recommended</div>
-            <input type="file" id="bannerFile" accept="image/*">
-          </div>
-          <div class="prev-wrap" id="bannerPrev"><img id="bannerImg" alt="banner" style="max-width:100%;max-height:55px;border-radius:7px"></div>
-        </div>
+    <!-- ══════════ HOW TO USE ══════════ -->
+    <div class="panel" id="panel-how">
+      <div class="sec-header">
+        <h2>How to Use</h2>
+        <p>Create and manage your Solana token in six steps</p>
       </div>
-
-      <div class="div"></div>
-      <p style="font-weight:700;font-size:.95rem;margin-bottom:1rem">Token Info</p>
-
-      <div class="fld"><label>Token Name</label><input type="text" id="profName" placeholder="Display name"></div>
-      <div class="fld"><label>Symbol</label><input type="text" id="profSymbol" maxlength="8" placeholder="e.g. MTK"></div>
-      <div class="fld"><label>Description</label><textarea id="profDesc" placeholder="Tell people about your token…"></textarea></div>
-
-      <div class="div"></div>
-      <p style="font-weight:700;font-size:.95rem;margin-bottom:1rem">Social Links</p>
-
-      <div class="fld"><label>🌐 Website</label><input type="text" id="profWeb" placeholder="https://yourtoken.io"></div>
-      <div class="fld"><label>𝕏 Twitter / X</label><input type="text" id="profTwitter" placeholder="https://twitter.com/yourtoken"></div>
-      <div class="fld"><label>✈️ Telegram</label><input type="text" id="profTelegram" placeholder="https://t.me/yourtoken"></div>
-      <div class="fld"><label>💬 Discord</label><input type="text" id="profDiscord" placeholder="https://discord.gg/yourtoken"></div>
-      <div class="fld"><label>📸 Instagram</label><input type="text" id="profInsta" placeholder="https://instagram.com/yourtoken"></div>
-
-      <button class="cbtn" id="profileBtn" disabled>Connect Wallet to Update Profile</button>
+      <div class="steps-grid">
+        <div class="step-card"><div class="step-num">1</div><h4>Connect Wallet</h4><p>Click "Connect Wallet" and approve in Phantom, Solflare or Backpack.</p></div>
+        <div class="step-card"><div class="step-num">2</div><h4>Choose Network</h4><p>Use Devnet for free testing. Switch to Mainnet when ready for real tokens.</p></div>
+        <div class="step-card"><div class="step-num">3</div><h4>Create Token</h4><p>Fill in name, symbol, supply and image. Approve the transactions in your wallet.</p></div>
+        <div class="step-card"><div class="step-num">4</div><h4>Send Tokens</h4><p>Distribute tokens to multiple wallets simultaneously with custom amounts.</p></div>
+        <div class="step-card"><div class="step-num">5</div><h4>Token Profile</h4><p>Build your metadata JSON with logo, banner and social links for IPFS upload.</p></div>
+        <div class="step-card"><div class="step-num">6</div><h4>Add Liquidity</h4><p>Go to Raydium with your mint address to create a SOL trading pair.</p></div>
+      </div>
     </div>
-  </div>
 
-  <!-- ░░ PANEL: LIQUIDITY ░░ -->
-  <div class="panel" id="panel-liq">
-    <div class="card">
-      <div class="card-h">Create Liquidity Pool</div>
-      <div class="card-sub">Pair your token with SOL on Raydium to enable trading</div>
-      <div class="sts fo show" style="margin-bottom:1rem">ℹ️ Freeze Authority must be revoked before creating a pool. Make sure you have SOL and tokens in your wallet.</div>
-      <div id="liqSts" class="sts"></div>
-      <div class="fld"><label>Token Mint Address <span class="req">*</span></label><input type="text" id="lMint" placeholder="Your token mint address"></div>
-      <div class="fld"><label>Token Amount <span class="req">*</span></label><input type="number" id="lTok" placeholder="e.g. 500000"></div>
-      <div class="fld"><label>SOL Amount <span class="req">*</span></label><input type="number" id="lSol" placeholder="e.g. 1.5" step="0.01"></div>
-      <button class="cbtn" id="liqBtn" disabled>Connect Wallet to Add Liquidity</button>
+    <!-- ══════════ FAQ ══════════ -->
+    <div class="panel" id="panel-faq">
+      <div class="sec-header">
+        <h2>FAQ</h2>
+        <p>Common questions answered</p>
+      </div>
+      <div class="faq"><div class="faq-q">Are there any service fees? <span class="faq-icon">+</span></div><div class="faq-a">Absolutely zero service fees. You only pay the unavoidable Solana network fees — typically 0.005–0.015 SOL total for creating a token. Sending tokens costs a small network fee per transaction. That's it.</div></div>
+      <div class="faq"><div class="faq-q">My wallet won't connect — what do I do? <span class="faq-icon">+</span></div><div class="faq-a">Make sure Phantom is installed and unlocked. If you're opening this as a local file (<code>file://</code>), go to <code>chrome://extensions</code> → Phantom → Details → enable "Allow access to file URLs". On a hosted URL (like Vercel) this is not needed.</div></div>
+      <div class="faq"><div class="faq-q">Is this safe to use? <span class="faq-icon">+</span></div><div class="faq-a">Yes. Every transaction is signed inside your own wallet. Your private keys never leave your device. The site has no backend — it communicates directly with Solana RPC nodes from your browser.</div></div>
+      <div class="faq"><div class="faq-q">Why do I need to revoke Freeze Authority? <span class="faq-icon">+</span></div><div class="faq-a">Raydium and most DEXes require Freeze Authority to be revoked before you can create a liquidity pool. Enable the toggle in Advanced Options before creating your token.</div></div>
+      <div class="faq"><div class="faq-q">Can I send to multiple wallets at once? <span class="faq-icon">+</span></div><div class="faq-a">Yes. In the Send Tokens tab, click "+ Add Recipient" to add as many rows as you need. Each wallet gets its own amount. You'll approve one transaction per recipient in your wallet.</div></div>
+      <div class="faq"><div class="faq-q">Which wallets are supported? <span class="faq-icon">+</span></div><div class="faq-a">Phantom, Solflare, Backpack and any wallet that injects <code>window.solana</code>. Phantom is the most reliable choice.</div></div>
+      <div class="faq"><div class="faq-q">How do I update my token's on-chain metadata? <span class="faq-icon">+</span></div><div class="faq-a">Use the Token Profile tab to build your metadata JSON. Upload it to IPFS (nft.storage is free), then use the Metaboss CLI tool with the IPFS URI to update the on-chain metadata.</div></div>
     </div>
-  </div>
 
-  <!-- ░░ PANEL: HOW TO USE ░░ -->
-  <div class="panel" id="panel-how">
-    <p style="text-align:center;font-size:1.5rem;font-weight:800;margin-bottom:.5rem">How to Use</p>
-    <p style="text-align:center;color:var(--t2);margin-bottom:2rem;font-size:.93rem">Everything you can do with Solana Token Creator</p>
-    <div class="steps">
-      <div class="step"><div class="step-n">1</div><h4>Connect Wallet</h4><p>Click "Connect Wallet". Phantom, Solflare and Backpack are all supported.</p></div>
-      <div class="step"><div class="step-n">2</div><h4>Choose Network</h4><p>Test free on Devnet first. Switch to Mainnet for real tokens.</p></div>
-      <div class="step"><div class="step-n">3</div><h4>Create Token</h4><p>Fill in name, symbol, supply, image and mint your token.</p></div>
-      <div class="step"><div class="step-n">4</div><h4>Send Tokens</h4><p>Distribute to multiple wallets in one flow — each with custom amounts.</p></div>
-      <div class="step"><div class="step-n">5</div><h4>Update Profile</h4><p>Add logo, banner, description, website and social links.</p></div>
-      <div class="step"><div class="step-n">6</div><h4>Add Liquidity</h4><p>Head to Raydium with your mint address to create a trading pool.</p></div>
-    </div>
-  </div>
-
-  <!-- ░░ PANEL: FAQ ░░ -->
-  <div class="panel" id="panel-faq">
-    <p style="text-align:center;font-size:1.5rem;font-weight:800;margin-bottom:.5rem">FAQ</p>
-    <p style="text-align:center;color:var(--t2);margin-bottom:2rem;font-size:.93rem">Common questions answered</p>
-
-    <div class="faq-item">
-      <div class="faq-q">Phantom is installed but won't connect? <span class="faq-ic">+</span></div>
-      <div class="faq-a">You're probably opening the file as <code>file://</code>. Phantom blocks that for security. Fix: Chrome → <code>chrome://extensions</code> → Phantom → Details → enable <strong>"Allow access to file URLs"</strong> → refresh. Or run <code>npx serve .</code> and open <code>http://localhost:3000</code>.</div>
-    </div>
-    <div class="faq-item">
-      <div class="faq-q">How much does it cost? <span class="faq-ic">+</span></div>
-      <div class="faq-a">Zero service fees. You only pay unavoidable Solana network fees — typically 0.005–0.015 SOL total for token creation.</div>
-    </div>
-    <div class="faq-item">
-      <div class="faq-q">Is it safe? <span class="faq-ic">+</span></div>
-      <div class="faq-a">Yes. All transactions are signed inside your own wallet. Your private keys never leave your device. Every transaction shows you the details before you approve.</div>
-    </div>
-    <div class="faq-item">
-      <div class="faq-q">Why revoke Freeze Authority? <span class="faq-ic">+</span></div>
-      <div class="faq-a">Raydium and most DEXes require it to be revoked before creating a liquidity pool. Without this your token cannot be listed.</div>
-    </div>
-    <div class="faq-item">
-      <div class="faq-q">Can I send to multiple wallets at once? <span class="faq-ic">+</span></div>
-      <div class="faq-a">Yes — use the Send Tokens tab. Add as many recipient rows as you need. Each transfer is sent sequentially and you approve each one in your wallet.</div>
-    </div>
-    <div class="faq-item">
-      <div class="faq-q">How does the token profile update work? <span class="faq-ic">+</span></div>
-      <div class="faq-a">The profile tab builds your metadata JSON and guides you to upload it to IPFS (via nft.storage or Pinata). Then use Metaboss CLI or Metaplex to push the URI on-chain. Only the wallet that created the token can update it.</div>
-    </div>
-    <div class="faq-item">
-      <div class="faq-q">Which wallets are supported? <span class="faq-ic">+</span></div>
-      <div class="faq-a">Phantom, Solflare, Backpack and any wallet that injects <code>window.solana</code>. Phantom is recommended.</div>
-    </div>
-  </div>
-
+  </div><!-- /app -->
 </main>
 
 <footer>
-  <div class="ft-links">
-    <a id="ftCreate">Create Token</a>
-    <a id="ftSend">Send Tokens</a>
-    <a id="ftProfile">Token Profile</a>
-    <a id="ftLiq">Liquidity</a>
-    <a id="ftHow">How to Use</a>
-    <a id="ftFaq">FAQ</a>
+  <div class="footer-links">
+    <button data-tab="create">Create Token</button>
+    <button data-tab="send">Send Tokens</button>
+    <button data-tab="profile">Token Profile</button>
+    <button data-tab="liquidity">Liquidity</button>
+    <button data-tab="how">How to Use</button>
+    <button data-tab="faq">FAQ</button>
   </div>
-  <div class="ft-c">© 2024 Solana Token Creator · No service fees · Only pay Solana network fees</div>
+  <div class="footer-copy">© 2024 Solana Token Creator · No service fees · Only pay Solana network fees</div>
 </footer>
 
+<!--
+  ╔══════════════════════════════════════════════════════════════╗
+  ║  ES MODULE SCRIPT                                            ║
+  ║  Imports Solana libs via esm.sh — the only CDN that          ║
+  ║  reliably converts npm packages to browser ES modules.       ║
+  ║  Works on any https:// deployment (Vercel, Netlify, etc.)    ║
+  ╚══════════════════════════════════════════════════════════════╝
+-->
+<script type="module">
+try {
+  const [web3, spl] = await Promise.all([
+    import('https://esm.sh/@solana/web3.js@1.95.8?bundle'),
+    import('https://esm.sh/@solana/spl-token@0.4.9?bundle')
+  ]);
+
+  // Make available globally for the main script
+  window.__web3 = web3;
+  window.__spl  = spl;
+  window.__libsReady = true;
+  document.dispatchEvent(new Event('solana-ready'));
+
+} catch (err) {
+  window.__libError = err.message || String(err);
+  document.dispatchEvent(new Event('solana-error'));
+}
+</script>
+
+<!--
+  ╔══════════════════════════════════════════════════════════════╗
+  ║  MAIN APP SCRIPT                                             ║
+  ║  Waits for libs then wires all UI interactions               ║
+  ╚══════════════════════════════════════════════════════════════╝
+-->
 <script>
-(function(){
-'use strict';
+(function () {
+  'use strict';
 
-/* ══════════════════════════════════
-   STATE
-══════════════════════════════════ */
-var NET = 'devnet';
-var PUB = null;   // connected public key string
-var PROV = null;  // wallet provider
-var SOL = null;   // @solana/web3.js
-var SPL = null;   // @solana/spl-token
-var CONN = null;  // Connection
-var libsLoading = false;
-var libsReady   = false;
-var advOpen     = false;
+  // ── state ──────────────────────────────────────────────────────
+  var network   = 'devnet';
+  var walletPub = null;
+  var provider  = null;
+  var conn      = null;
+  var W3        = null; // web3.js namespace
+  var SPL       = null; // spl-token namespace
+  var advOpen   = false;
 
-var RPC = {
-  devnet:  'https://api.devnet.solana.com',
-  mainnet: 'https://solana-mainnet.g.alchemy.com/v2/demo'
-};
-
-/* ══════════════════════════════════
-   HELPERS
-══════════════════════════════════ */
-function $(id){ return document.getElementById(id); }
-function short(a){ return a.slice(0,4)+'…'+a.slice(-4); }
-
-function showSts(id, html, cls){
-  var el=$(id); el.innerHTML=html; el.className='sts show '+cls;
-}
-function hideSts(id){ $(id).className='sts'; }
-
-/* ══════════════════════════════════
-   FILE:// DETECTION
-══════════════════════════════════ */
-if(window.location.protocol === 'file:'){
-  $('fileNotice').classList.add('show');
-}
-
-/* ══════════════════════════════════
-   TABS
-══════════════════════════════════ */
-var TAB_MAP = {
-  'tab-create':  'panel-create',
-  'tab-send':    'panel-send',
-  'tab-profile': 'panel-profile',
-  'tab-liq':     'panel-liq',
-  'tab-how':     'panel-how',
-  'tab-faq':     'panel-faq'
-};
-
-function switchTab(tabId){
-  Object.keys(TAB_MAP).forEach(function(t){
-    $(t).classList.toggle('on', t===tabId);
-    $(TAB_MAP[t]).classList.toggle('on', t===tabId);
-  });
-}
-
-Object.keys(TAB_MAP).forEach(function(t){
-  $(t).onclick = function(){ switchTab(t); };
-});
-
-// Nav links → switch tabs
-$('logoBtn').onclick     = function(){ switchTab('tab-create'); window.scrollTo({top:0,behavior:'smooth'}); };
-$('navCreate').onclick   = function(){ switchTab('tab-create'); };
-$('navSend').onclick     = function(){ switchTab('tab-send'); };
-$('navProfile').onclick  = function(){ switchTab('tab-profile'); };
-$('navLiq').onclick      = function(){ switchTab('tab-liq'); };
-$('navHow').onclick      = function(){ switchTab('tab-how'); };
-$('navFaq').onclick      = function(){ switchTab('tab-faq'); };
-$('ftCreate').onclick    = function(){ switchTab('tab-create'); };
-$('ftSend').onclick      = function(){ switchTab('tab-send'); };
-$('ftProfile').onclick   = function(){ switchTab('tab-profile'); };
-$('ftLiq').onclick       = function(){ switchTab('tab-liq'); };
-$('ftHow').onclick       = function(){ switchTab('tab-how'); };
-$('ftFaq').onclick       = function(){ switchTab('tab-faq'); };
-
-/* ══════════════════════════════════
-   NETWORK TOGGLE
-══════════════════════════════════ */
-$('devBtn').onclick = function(){
-  if(PUB){ showSts('createSts','Disconnect wallet before switching networks.','er'); switchTab('tab-create'); return; }
-  NET='devnet';
-  $('devBtn').classList.add('on'); $('mainBtn').classList.remove('on');
-  $('sNet').textContent='Devnet';
-  if(SOL) CONN=new SOL.Connection(RPC.devnet,'confirmed');
-  showSts('createSts','✓ Switched to Devnet','fo');
-  switchTab('tab-create');
-};
-$('mainBtn').onclick = function(){
-  if(PUB){ showSts('createSts','Disconnect wallet before switching networks.','er'); switchTab('tab-create'); return; }
-  NET='mainnet';
-  $('mainBtn').classList.add('on'); $('devBtn').classList.remove('on');
-  $('sNet').textContent='Mainnet';
-  if(SOL) CONN=new SOL.Connection(RPC.mainnet,'confirmed');
-  showSts('createSts','✓ Switched to Mainnet','fo');
-  switchTab('tab-create');
-};
-
-/* ══════════════════════════════════
-   WALLET DETECTION + CONNECT
-══════════════════════════════════ */
-function detectProvider(){
-  // Phantom v0.3+ → window.phantom.solana
-  if(window.phantom && window.phantom.solana && window.phantom.solana.isPhantom)
-    return window.phantom.solana;
-  // Legacy Phantom / Solflare / others → window.solana
-  if(window.solana && window.solana.connect)
-    return window.solana;
-  // Solflare standalone
-  if(window.solflare && window.solflare.isSolflare)
-    return window.solflare;
-  return null;
-}
-
-$('walletBtn').onclick = function(){
-  if(PUB){ doDisconnect(); } else { doConnect(); }
-};
-
-async function doConnect(){
-  var btn = $('walletBtn');
-  btn.textContent='Detecting…'; btn.disabled=true;
-
-  // Poll up to 3 seconds for extension injection
-  var prov=null, tries=0;
-  while(!prov && tries<30){
-    prov=detectProvider();
-    if(!prov){ await sleep(100); tries++; }
-  }
-
-  if(!prov){
-    btn.textContent='Connect Wallet'; btn.disabled=false;
-    switchTab('tab-create');
-    showSts('createSts',
-      '<strong>⚠️ Wallet not detected</strong> — but Phantom may still be installed.<br><br>'+
-      '<strong>Most likely fix:</strong> You\'re on a <code>file://</code> URL. Phantom blocks this for security.<br>'+
-      '👉 In Chrome: go to <code>chrome://extensions</code> → Phantom → <strong>Details</strong> → enable <strong>"Allow access to file URLs"</strong> → refresh.<br><br>'+
-      'Other causes: Phantom is locked (open it first), or not installed yet → '+
-      '<a href="https://phantom.app" target="_blank" style="color:var(--g)">phantom.app</a>',
-      'er');
-    return;
-  }
-
-  try{
-    btn.textContent='Connecting…';
-    var resp = await prov.connect();
-    PUB  = resp.publicKey.toString();
-    PROV = prov;
-
-    var s = short(PUB);
-    btn.textContent=s; btn.classList.add('connected'); btn.disabled=false;
-
-    $('sWal').textContent=s;
-    setButtonsEnabled(true);
-    showSts('createSts','✅ Connected: '+s,'ok');
-    if(SOL) CONN=new SOL.Connection(RPC[NET],'confirmed');
-    try{ prov.on('disconnect', doDisconnect); }catch(e){}
-  }catch(e){
-    btn.textContent='Connect Wallet'; btn.disabled=false;
-    showSts('createSts','Connection cancelled: '+(e.message||String(e)),'er');
-    switchTab('tab-create');
-  }
-}
-
-function doDisconnect(){
-  if(PROV){ try{ PROV.disconnect(); }catch(e){} }
-  PUB=null; PROV=null;
-  var btn=$('walletBtn');
-  btn.textContent='Connect Wallet'; btn.classList.remove('connected'); btn.disabled=false;
-  $('sWal').textContent='Not connected';
-  setButtonsEnabled(false);
-}
-
-function setButtonsEnabled(on){
-  var map={
-    createBtn:  on?'Create Token'          :'Connect Wallet to Create Token',
-    sendBtn:    on?'Send Tokens'           :'Connect Wallet to Send',
-    profileBtn: on?'Update Token Profile'  :'Connect Wallet to Update Profile',
-    liqBtn:     on?'Create Liquidity Pool' :'Connect Wallet to Add Liquidity'
+  var RPC = {
+    devnet:  'https://api.devnet.solana.com',
+    mainnet: 'https://solana-mainnet.g.alchemy.com/v2/demo'
   };
-  Object.keys(map).forEach(function(id){
-    var el=$(id); el.disabled=!on; el.textContent=map[id];
-  });
-}
 
-/* ══════════════════════════════════
-   IMAGE UPLOADS
-══════════════════════════════════ */
-function wireUpload(boxId, inputId, wrapId, imgId){
-  var box=$(boxId), inp=$(inputId), wrap=$(wrapId), img=$(imgId);
-  box.addEventListener('click',function(e){ if(e.target!==inp) inp.click(); });
-  inp.addEventListener('change',function(){ readImg(this.files[0],img,wrap); });
-  box.addEventListener('dragover',function(e){ e.preventDefault(); box.classList.add('drag'); });
-  box.addEventListener('dragleave',function(){ box.classList.remove('drag'); });
-  box.addEventListener('drop',function(e){
-    e.preventDefault(); box.classList.remove('drag');
-    var f=e.dataTransfer.files[0];
-    if(f&&f.type.startsWith('image/')) readImg(f,img,wrap);
-  });
-}
-function readImg(f,imgEl,wrapEl){
-  if(!f) return;
-  var r=new FileReader();
-  r.onload=function(ev){ imgEl.src=ev.target.result; wrapEl.style.display='block'; };
-  r.readAsDataURL(f);
-}
+  // ── DOM helpers ─────────────────────────────────────────────────
+  function el(id)     { return document.getElementById(id); }
+  function abbr(addr) { return addr.slice(0,4) + '…' + addr.slice(-4); }
 
-wireUpload('upBox',     'imgFile',    'prevWrap',  'prevImg');
-wireUpload('logoBox',   'logoFile',   'logoPrev',  'logoImg');
-wireUpload('bannerBox', 'bannerFile', 'bannerPrev','bannerImg');
-
-/* ══════════════════════════════════
-   ADVANCED OPTIONS
-══════════════════════════════════ */
-$('advBtn').onclick=function(){
-  advOpen=!advOpen;
-  $('advBody').className='adv-body'+(advOpen?' open':'');
-  this.textContent=advOpen?'Hide Advanced Options ▲':'Show Advanced Options ▼';
-};
-$('frCk').onchange=function(){ $('sFr').textContent=this.checked?'Yes':'No'; };
-$('miCk').onchange=function(){ $('sMi').textContent=this.checked?'Yes':'No'; };
-
-/* ══════════════════════════════════
-   RECIPIENT ROWS
-══════════════════════════════════ */
-$('addRecipBtn').onclick=function(){
-  var row=document.createElement('div');
-  row.className='recip-row';
-  row.innerHTML='<input type="text" class="raddr" placeholder="Wallet address">'+
-    '<input type="number" class="ramt" placeholder="Amount" min="0">'+
-    '<button class="delbtn" onclick="delRecip(this)">✕</button>';
-  $('recipList').appendChild(row);
-};
-window.delRecip=function(btn){
-  var rows=document.querySelectorAll('.recip-row');
-  if(rows.length>1) btn.closest('.recip-row').remove();
-};
-
-/* ══════════════════════════════════
-   FAQ
-══════════════════════════════════ */
-document.querySelectorAll('.faq-q').forEach(function(q){
-  q.addEventListener('click',function(){
-    var item=q.closest('.faq-item');
-    var was=item.classList.contains('open');
-    document.querySelectorAll('.faq-item.open').forEach(function(x){ x.classList.remove('open'); });
-    if(!was) item.classList.add('open');
-  });
-});
-
-/* ══════════════════════════════════
-   LOAD SOLANA LIBS — multi-CDN fallback
-   web3.js:   unpkg → jsdelivr → cdnjs
-   spl-token: jsdelivr (only place with IIFE build)
-══════════════════════════════════ */
-var WEB3_URLS = [
-  'https://unpkg.com/@solana/web3.js@1.95.8/lib/index.iife.js',
-  'https://cdn.jsdelivr.net/npm/@solana/web3.js@1.95.8/lib/index.iife.js'
-];
-var SPL_URLS = [
-  'https://cdn.jsdelivr.net/npm/@solana/spl-token@0.4.9/lib/index.iife.js',
-  'https://unpkg.com/@solana/spl-token@0.4.9/lib/index.iife.js'
-];
-
-function inj(src){
-  return new Promise(function(resolve, reject){
-    // Skip if already loaded (same src injected twice)
-    if(document.querySelector('script[src="'+src+'"]')){
-      resolve(); return;
-    }
-    var s = document.createElement('script');
-    s.src = src;
-    s.crossOrigin = 'anonymous';
-    s.onload  = function(){ resolve(); };
-    s.onerror = function(){ reject(new Error('Failed: '+src)); };
-    document.body.appendChild(s);
-  });
-}
-
-async function tryUrls(urls, checkFn, libName){
-  for(var i=0; i<urls.length; i++){
-    try{
-      await inj(urls[i]);
-      var result = checkFn();
-      if(result) return result;
-    }catch(e){
-      console.warn('CDN attempt failed:', urls[i], e.message);
-    }
+  function setStatus(id, html, type) {
+    var e = el(id);
+    e.innerHTML  = html;
+    e.className  = 'status show ' + type;
   }
-  throw new Error('Could not load '+libName+' from any CDN. Check your internet connection.');
-}
+  function clearStatus(id) { el(id).className = 'status'; }
 
-function loadLibs(cb){
-  if(libsReady){ cb(null); return; }
-  if(libsLoading){
-    var t=setInterval(function(){ if(libsReady){ clearInterval(t); cb(null); }},150);
-    return;
+  function sleep(ms) {
+    return new Promise(function (r) { setTimeout(r, ms); });
   }
-  libsLoading=true;
 
-  tryUrls(WEB3_URLS, function(){ return window.solanaWeb3||null; }, '@solana/web3.js')
-  .then(function(w3){
-    SOL = w3;
-    return tryUrls(SPL_URLS, function(){ return window.splToken||null; }, '@solana/spl-token');
-  })
-  .then(function(spl){
-    SPL  = spl;
-    CONN = new SOL.Connection(RPC[NET],'confirmed');
-    libsReady  = true;
-    libsLoading = false;
-    cb(null);
-  })
-  .catch(function(err){
-    libsLoading = false;
-    cb(err);
-  });
-}
+  // ── wait for ES module libs ─────────────────────────────────────
+  function onLibsReady() {
+    W3  = window.__web3;
+    SPL = window.__spl;
+    conn = new W3.Connection(RPC[network], 'confirmed');
 
-/* ══════════════════════════════════
-   CREATE TOKEN
-══════════════════════════════════ */
-$('createBtn').onclick=function(){
-  if(!PUB){ showSts('createSts','Connect your wallet first.','er'); return; }
-  var name=$('tName').value.trim(), sym=$('tSymbol').value.trim(), sup=parseInt($('tSup').value);
-  if(!name||!sym||!sup||sup<=0){ showSts('createSts','Fill in Name, Symbol and Supply.','er'); return; }
-  showSts('createSts','⏳ Loading libraries…','fo');
-  loadLibs(function(err){
-    if(err){ showSts('createSts','❌ '+err.message,'er'); return; }
-    doCreate(name,sym,parseInt($('tDec').value)||6,sup,$('frCk').checked,$('miCk').checked);
-  });
-};
+    el('loadingState').style.display = 'none';
+    el('app').style.display          = 'block';
+    initApp();
+  }
 
-async function doCreate(name,sym,dec,sup,rfr,rmi){
-  var btn=$('createBtn'); btn.disabled=true; btn.textContent='Working…';
-  try{
-    var payer=new SOL.PublicKey(PUB);
-    var mintKp=SOL.Keypair.generate();
-    var lam=await SPL.getMinimumBalanceForRentExemptMint(CONN);
+  function onLibsError() {
+    el('loadingState').style.display = 'none';
+    el('errorState').style.display   = 'block';
+    el('errorMsg').textContent =
+      'Could not load Solana libraries: ' + (window.__libError || 'unknown error') +
+      '. Make sure no ad-blocker is blocking esm.sh and that you have internet access.';
+  }
 
-    // 1 — mint account
-    showSts('createSts','1/5 — Creating mint account… (approve in wallet)','fo');
-    var tx1=new SOL.Transaction().add(
-      SOL.SystemProgram.createAccount({
-        fromPubkey:payer, newAccountPubkey:mintKp.publicKey,
-        space:SPL.MINT_SIZE, lamports:lam, programId:SPL.TOKEN_PROGRAM_ID
-      }),
-      SPL.createInitializeMintInstruction(mintKp.publicKey,dec,payer,rmi?null:payer,SPL.TOKEN_PROGRAM_ID)
-    );
-    var bh1=await CONN.getLatestBlockhash();
-    tx1.recentBlockhash=bh1.blockhash; tx1.feePayer=payer; tx1.partialSign(mintKp);
-    var r1=await PROV.signAndSendTransaction(tx1);
-    await CONN.confirmTransaction(r1.signature,'confirmed');
+  if (window.__libsReady) {
+    onLibsReady();
+  } else if (window.__libError) {
+    onLibsError();
+  } else {
+    document.addEventListener('solana-ready', onLibsReady);
+    document.addEventListener('solana-error', onLibsError);
+  }
 
-    // 2 — ATA
-    showSts('createSts','2/5 — Creating token account…','fo');
-    var ata=await SPL.getAssociatedTokenAddress(mintKp.publicKey,payer,false,SPL.TOKEN_PROGRAM_ID);
-    var tx2=new SOL.Transaction().add(
-      SPL.createAssociatedTokenAccountInstruction(payer,ata,payer,mintKp.publicKey,SPL.TOKEN_PROGRAM_ID)
-    );
-    var bh2=await CONN.getLatestBlockhash();
-    tx2.recentBlockhash=bh2.blockhash; tx2.feePayer=payer;
-    var r2=await PROV.signAndSendTransaction(tx2);
-    await CONN.confirmTransaction(r2.signature,'confirmed');
+  // ── INIT ────────────────────────────────────────────────────────
+  function initApp() {
 
-    // 3 — mint
-    showSts('createSts','3/5 — Minting tokens…','fo');
-    var amt=BigInt(sup)*BigInt(Math.pow(10,dec));
-    var tx3=new SOL.Transaction().add(
-      SPL.createMintToInstruction(mintKp.publicKey,ata,payer,amt,[],SPL.TOKEN_PROGRAM_ID)
-    );
-    var bh3=await CONN.getLatestBlockhash();
-    tx3.recentBlockhash=bh3.blockhash; tx3.feePayer=payer;
-    var r3=await PROV.signAndSendTransaction(tx3);
-    await CONN.confirmTransaction(r3.signature,'confirmed');
-
-    // 4 — revoke freeze
-    if(rfr){
-      showSts('createSts','4/5 — Revoking freeze authority…','fo');
-      var tx4=new SOL.Transaction().add(
-        SPL.createSetAuthorityInstruction(mintKp.publicKey,payer,SPL.AuthorityType.FreezeAccount,null,[],SPL.TOKEN_PROGRAM_ID)
-      );
-      var bh4=await CONN.getLatestBlockhash();
-      tx4.recentBlockhash=bh4.blockhash; tx4.feePayer=payer;
-      var r4=await PROV.signAndSendTransaction(tx4);
-      await CONN.confirmTransaction(r4.signature,'confirmed');
+    // Tabs ─────────────────────────────────────────────────────────
+    function switchTab(name) {
+      document.querySelectorAll('.tab').forEach(function (t) {
+        t.classList.toggle('active', t.dataset.tab === name);
+      });
+      document.querySelectorAll('.panel').forEach(function (p) {
+        p.classList.toggle('active', p.id === 'panel-' + name);
+      });
     }
 
-    // 5 — revoke mint
-    if(rmi){
-      showSts('createSts','5/5 — Revoking mint authority…','fo');
-      var tx5=new SOL.Transaction().add(
-        SPL.createSetAuthorityInstruction(mintKp.publicKey,payer,SPL.AuthorityType.MintTokens,null,[],SPL.TOKEN_PROGRAM_ID)
-      );
-      var bh5=await CONN.getLatestBlockhash();
-      tx5.recentBlockhash=bh5.blockhash; tx5.feePayer=payer;
-      var r5=await PROV.signAndSendTransaction(tx5);
-      await CONN.confirmTransaction(r5.signature,'confirmed');
+    document.querySelectorAll('[data-tab]').forEach(function (btn) {
+      btn.addEventListener('click', function () { switchTab(btn.dataset.tab); });
+    });
+
+    el('goHome').addEventListener('click', function (e) {
+      e.preventDefault();
+      switchTab('create');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    // Network ──────────────────────────────────────────────────────
+    el('btn-devnet').addEventListener('click', function () {
+      if (walletPub) { setStatus('sts-create', 'Disconnect wallet before switching networks.', 'error'); switchTab('create'); return; }
+      network = 'devnet';
+      el('btn-devnet').classList.add('active');
+      el('btn-mainnet').classList.remove('active');
+      el('sum-net').textContent = 'Devnet';
+      conn = new W3.Connection(RPC.devnet, 'confirmed');
+      setStatus('sts-create', '✓ Switched to Devnet', 'info');
+      switchTab('create');
+    });
+
+    el('btn-mainnet').addEventListener('click', function () {
+      if (walletPub) { setStatus('sts-create', 'Disconnect wallet before switching networks.', 'error'); switchTab('create'); return; }
+      network = 'mainnet';
+      el('btn-mainnet').classList.add('active');
+      el('btn-devnet').classList.remove('active');
+      el('sum-net').textContent = 'Mainnet';
+      conn = new W3.Connection(RPC.mainnet, 'confirmed');
+      setStatus('sts-create', '✓ Switched to Mainnet', 'info');
+      switchTab('create');
+    });
+
+    // Wallet ───────────────────────────────────────────────────────
+    function detectWallet() {
+      if (window.phantom  && window.phantom.solana  && window.phantom.solana.isPhantom) return window.phantom.solana;
+      if (window.solana   && window.solana.connect)  return window.solana;
+      if (window.solflare && window.solflare.isSolflare) return window.solflare;
+      return null;
     }
 
-    var mint=mintKp.publicKey.toString();
-    var url=NET==='mainnet'
-      ?'https://solscan.io/token/'+mint
-      :'https://solscan.io/token/'+mint+'?cluster=devnet';
+    el('walletBtn').addEventListener('click', function () {
+      walletPub ? doDisconnect() : doConnect();
+    });
 
-    // auto-fill other panels
-    $('sendMint').value=$('profMint').value=$('lMint').value=mint;
+    async function doConnect() {
+      var btn = el('walletBtn');
+      btn.textContent = 'Detecting…';
+      btn.disabled    = true;
 
-    showSts('createSts',
-      '✅ Token created!<br>'+
-      'Mint: <code style="font-size:.78rem">'+mint+'</code>'+
-      '<span class="chip" onclick="cp(\''+mint+'\')">Copy</span><br>'+
-      '<a class="expl" href="'+url+'" target="_blank">View on Solscan ↗</a>',
-      'ok');
-  }catch(e){
-    console.error(e);
-    showSts('createSts','❌ '+e.message,'er');
-  }finally{
-    btn.disabled=false; btn.textContent='Create Token';
-  }
-}
+      // Poll up to 3 s for extension injection
+      var prov = null, tries = 0;
+      while (!prov && tries < 30) { prov = detectWallet(); if (!prov) { await sleep(100); tries++; } }
 
-/* ══════════════════════════════════
-   SEND TOKENS
-══════════════════════════════════ */
-$('sendBtn').onclick=function(){
-  if(!PUB){ showSts('sendSts','Connect your wallet first.','er'); return; }
-  var mint=$('sendMint').value.trim();
-  if(!mint){ showSts('sendSts','Enter the token mint address.','er'); return; }
-
-  var addrs=document.querySelectorAll('.raddr');
-  var amts =document.querySelectorAll('.ramt');
-  var recips=[];
-  for(var i=0;i<addrs.length;i++){
-    var a=addrs[i].value.trim(), v=parseFloat(amts[i].value);
-    if(!a||isNaN(v)||v<=0){ showSts('sendSts','Every row needs a valid address and amount > 0.','er'); return; }
-    recips.push({addr:a,amt:v});
-  }
-  if(!recips.length){ showSts('sendSts','Add at least one recipient.','er'); return; }
-
-  showSts('sendSts','⏳ Loading libraries…','fo');
-  loadLibs(function(err){
-    if(err){ showSts('sendSts','❌ '+err.message,'er'); return; }
-    doSend(mint,parseInt($('sendDec').value)||6,recips);
-  });
-};
-
-async function doSend(mintAddr,dec,recips){
-  var btn=$('sendBtn'); btn.disabled=true; btn.textContent='Sending…';
-  try{
-    var payer   =new SOL.PublicKey(PUB);
-    var mintPub =new SOL.PublicKey(mintAddr);
-    var srcAta  =await SPL.getAssociatedTokenAddress(mintPub,payer,false,SPL.TOKEN_PROGRAM_ID);
-
-    for(var i=0;i<recips.length;i++){
-      var r=recips[i];
-      showSts('sendSts','⏳ Sending to '+short(r.addr)+' ('+(i+1)+'/'+recips.length+')… approve in wallet','fo');
-
-      var destPub =new SOL.PublicKey(r.addr);
-      var destAta =await SPL.getAssociatedTokenAddress(mintPub,destPub,false,SPL.TOKEN_PROGRAM_ID);
-      var exists  =await CONN.getAccountInfo(destAta);
-
-      var tx=new SOL.Transaction();
-      if(!exists){
-        tx.add(SPL.createAssociatedTokenAccountInstruction(payer,destAta,destPub,mintPub,SPL.TOKEN_PROGRAM_ID));
+      if (!prov) {
+        btn.textContent = 'Connect Wallet';
+        btn.disabled    = false;
+        switchTab('create');
+        setStatus('sts-create',
+          '⚠️ Wallet not found. Make sure <strong>Phantom is installed and unlocked</strong>.<br>' +
+          '<a href="https://phantom.app" target="_blank" style="color:var(--g)">Download Phantom →</a>',
+          'error');
+        return;
       }
-      var sendAmt=BigInt(Math.round(r.amt*Math.pow(10,dec)));
-      tx.add(SPL.createTransferInstruction(srcAta,destAta,payer,sendAmt,[],SPL.TOKEN_PROGRAM_ID));
 
-      var bh=await CONN.getLatestBlockhash();
-      tx.recentBlockhash=bh.blockhash; tx.feePayer=payer;
-      var res=await PROV.signAndSendTransaction(tx);
-      await CONN.confirmTransaction(res.signature,'confirmed');
+      try {
+        btn.textContent = 'Connecting…';
+        var resp     = await prov.connect();
+        walletPub    = resp.publicKey.toString();
+        provider     = prov;
+        var short    = abbr(walletPub);
+
+        btn.textContent = short;
+        btn.classList.add('connected');
+        btn.disabled    = false;
+
+        el('sum-wallet').textContent = short;
+        conn = new W3.Connection(RPC[network], 'confirmed');
+        enableActionButtons(true);
+        setStatus('sts-create', '✅ Wallet connected: ' + short, 'success');
+        try { prov.on('disconnect', doDisconnect); } catch (e) {}
+      } catch (e) {
+        btn.textContent = 'Connect Wallet';
+        btn.disabled    = false;
+        setStatus('sts-create', 'Connection cancelled: ' + (e.message || String(e)), 'error');
+      }
     }
-    showSts('sendSts','✅ Sent successfully to '+recips.length+' wallet'+(recips.length>1?'s':'')+'!','ok');
-  }catch(e){
-    console.error(e);
-    showSts('sendSts','❌ '+e.message,'er');
-  }finally{
-    btn.disabled=false; btn.textContent='Send Tokens';
-  }
-}
 
-/* ══════════════════════════════════
-   TOKEN PROFILE
-══════════════════════════════════ */
-$('profileBtn').onclick=function(){
-  if(!PUB){ showSts('profSts','Connect your wallet first.','er'); return; }
-  var mint=$('profMint').value.trim();
-  if(!mint){ showSts('profSts','Enter the token mint address.','er'); return; }
-
-  var logoSrc  =$('logoImg').src   ||'';
-  var bannerSrc=$('bannerImg').src ||'';
-
-  var meta={
-    name:    $('profName').value.trim()     || '(not set)',
-    symbol:  $('profSymbol').value.trim()   || '(not set)',
-    description: $('profDesc').value.trim() || '',
-    image:   logoSrc.startsWith('data:')   ? 'REPLACE_WITH_IPFS_URI_FOR_LOGO'   : (logoSrc||''),
-    banner:  bannerSrc.startsWith('data:') ? 'REPLACE_WITH_IPFS_URI_FOR_BANNER' : (bannerSrc||''),
-    external_url: $('profWeb').value.trim() || '',
-    extensions:{
-      twitter:  $('profTwitter').value.trim()  ||'',
-      telegram: $('profTelegram').value.trim()  ||'',
-      discord:  $('profDiscord').value.trim()   ||'',
-      instagram:$('profInsta').value.trim()     ||''
+    function doDisconnect() {
+      if (provider) { try { provider.disconnect(); } catch (e) {} }
+      walletPub = null; provider = null;
+      var btn = el('walletBtn');
+      btn.textContent = 'Connect Wallet';
+      btn.classList.remove('connected');
+      btn.disabled = false;
+      el('sum-wallet').textContent = 'Not connected';
+      enableActionButtons(false);
     }
+
+    function enableActionButtons(on) {
+      var pairs = [
+        ['createBtn',  on ? 'Create Token'           : 'Connect Wallet to Create Token'],
+        ['sendBtn',    on ? 'Send Tokens'             : 'Connect Wallet to Send'],
+        ['profileBtn', on ? 'Generate Profile JSON'   : 'Connect Wallet to Generate Profile'],
+        ['liqBtn',     on ? 'Open Raydium Pool Creator': 'Connect Wallet to Add Liquidity']
+      ];
+      pairs.forEach(function (p) {
+        var e = el(p[0]);
+        e.disabled    = !on;
+        e.textContent = p[1];
+      });
+    }
+
+    // Image uploads ────────────────────────────────────────────────
+    function wireUpload(boxId, inputId, wrapId, imgId) {
+      var box = el(boxId), inp = el(inputId), wrap = el(wrapId), img = el(imgId);
+      box.addEventListener('click', function (e) { if (e.target !== inp) inp.click(); });
+      inp.addEventListener('change', function () { loadPreview(this.files[0], img, wrap); });
+      box.addEventListener('dragover',  function (e) { e.preventDefault(); box.classList.add('over'); });
+      box.addEventListener('dragleave', function ()  { box.classList.remove('over'); });
+      box.addEventListener('drop', function (e) {
+        e.preventDefault(); box.classList.remove('over');
+        var f = e.dataTransfer.files[0];
+        if (f && f.type.startsWith('image/')) loadPreview(f, img, wrap);
+      });
+    }
+
+    function loadPreview(f, imgEl, wrapEl) {
+      if (!f) return;
+      var reader = new FileReader();
+      reader.onload = function (ev) { imgEl.src = ev.target.result; wrapEl.style.display = 'block'; };
+      reader.readAsDataURL(f);
+    }
+
+    wireUpload('c-imgbox',    'c-img',    'c-imgprev',   'c-imgel');
+    wireUpload('p-logobox',   'p-logo',   'p-logoprev',  'p-logoimg');
+    wireUpload('p-bannerbox', 'p-banner', 'p-bannerprev','p-bannerimg');
+
+    // Advanced options ─────────────────────────────────────────────
+    el('advToggle').addEventListener('click', function () {
+      advOpen = !advOpen;
+      el('advSection').className = 'adv-section' + (advOpen ? ' open' : '');
+      this.textContent = advOpen ? '⚙️ Hide Advanced Options ▲' : '⚙️ Show Advanced Options ▼';
+    });
+    el('c-freeze').addEventListener('change', function () { el('sum-freeze').textContent = this.checked ? 'Yes' : 'No'; });
+    el('c-mint').addEventListener('change',   function () { el('sum-mint').textContent   = this.checked ? 'Yes' : 'No'; });
+
+    // Add/remove recipients ────────────────────────────────────────
+    el('addRecipient').addEventListener('click', function () {
+      var row = document.createElement('div');
+      row.className = 'recip-row';
+      row.innerHTML =
+        '<input type="text"   class="r-addr" placeholder="Wallet address">' +
+        '<input type="number" class="r-amt"  placeholder="Amount" min="0" step="any">' +
+        '<button class="del-btn" onclick="removeRecipient(this)">✕</button>';
+      el('recipientList').appendChild(row);
+    });
+
+    // FAQ ──────────────────────────────────────────────────────────
+    document.querySelectorAll('.faq-q').forEach(function (q) {
+      q.addEventListener('click', function () {
+        var item = q.closest('.faq');
+        var open = item.classList.contains('open');
+        document.querySelectorAll('.faq.open').forEach(function (x) { x.classList.remove('open'); });
+        if (!open) item.classList.add('open');
+      });
+    });
+
+    // ── CREATE TOKEN ──────────────────────────────────────────────
+    el('createBtn').addEventListener('click', function () {
+      if (!walletPub) { setStatus('sts-create', 'Connect your wallet first.', 'error'); return; }
+      var name  = el('c-name').value.trim();
+      var sym   = el('c-symbol').value.trim();
+      var sup   = parseInt(el('c-supply').value);
+      var dec   = parseInt(el('c-decimals').value) || 6;
+      var doFreeze = el('c-freeze').checked;
+      var doMint   = el('c-mint').checked;
+
+      if (!name)      { setStatus('sts-create', 'Please enter a token name.',   'error'); return; }
+      if (!sym)       { setStatus('sts-create', 'Please enter a token symbol.', 'error'); return; }
+      if (!sup||sup<=0){ setStatus('sts-create', 'Please enter a valid supply.', 'error'); return; }
+
+      createToken(name, sym, dec, sup, doFreeze, doMint);
+    });
+
+    async function createToken(name, sym, dec, sup, doFreeze, doMint) {
+      var btn = el('createBtn');
+      btn.disabled = true; btn.textContent = 'Working…';
+      try {
+        var payer  = new W3.PublicKey(walletPub);
+        var mintKp = W3.Keypair.generate();
+        var rent   = await SPL.getMinimumBalanceForRentExemptMint(conn);
+
+        // Step 1 — create mint account
+        setStatus('sts-create', '⏳ Step 1/5 — Creating mint account… (approve in wallet)', 'info');
+        var tx1 = new W3.Transaction().add(
+          W3.SystemProgram.createAccount({
+            fromPubkey:       payer,
+            newAccountPubkey: mintKp.publicKey,
+            space:            SPL.MINT_SIZE,
+            lamports:         rent,
+            programId:        SPL.TOKEN_PROGRAM_ID
+          }),
+          SPL.createInitializeMintInstruction(
+            mintKp.publicKey, dec, payer, doMint ? null : payer, SPL.TOKEN_PROGRAM_ID
+          )
+        );
+        var bh1 = await conn.getLatestBlockhash();
+        tx1.recentBlockhash = bh1.blockhash; tx1.feePayer = payer;
+        tx1.partialSign(mintKp);
+        var sig1 = await provider.signAndSendTransaction(tx1);
+        await conn.confirmTransaction(sig1.signature, 'confirmed');
+
+        // Step 2 — create associated token account
+        setStatus('sts-create', '⏳ Step 2/5 — Creating your token account…', 'info');
+        var ata = await SPL.getAssociatedTokenAddress(mintKp.publicKey, payer, false, SPL.TOKEN_PROGRAM_ID);
+        var tx2 = new W3.Transaction().add(
+          SPL.createAssociatedTokenAccountInstruction(payer, ata, payer, mintKp.publicKey, SPL.TOKEN_PROGRAM_ID)
+        );
+        var bh2 = await conn.getLatestBlockhash();
+        tx2.recentBlockhash = bh2.blockhash; tx2.feePayer = payer;
+        var sig2 = await provider.signAndSendTransaction(tx2);
+        await conn.confirmTransaction(sig2.signature, 'confirmed');
+
+        // Step 3 — mint tokens
+        setStatus('sts-create', '⏳ Step 3/5 — Minting ' + sup.toLocaleString() + ' tokens to your wallet…', 'info');
+        var mintAmt = BigInt(sup) * BigInt(Math.pow(10, dec));
+        var tx3 = new W3.Transaction().add(
+          SPL.createMintToInstruction(mintKp.publicKey, ata, payer, mintAmt, [], SPL.TOKEN_PROGRAM_ID)
+        );
+        var bh3 = await conn.getLatestBlockhash();
+        tx3.recentBlockhash = bh3.blockhash; tx3.feePayer = payer;
+        var sig3 = await provider.signAndSendTransaction(tx3);
+        await conn.confirmTransaction(sig3.signature, 'confirmed');
+
+        // Step 4 — revoke freeze authority
+        if (doFreeze) {
+          setStatus('sts-create', '⏳ Step 4/5 — Revoking freeze authority…', 'info');
+          var tx4 = new W3.Transaction().add(
+            SPL.createSetAuthorityInstruction(
+              mintKp.publicKey, payer, SPL.AuthorityType.FreezeAccount, null, [], SPL.TOKEN_PROGRAM_ID
+            )
+          );
+          var bh4 = await conn.getLatestBlockhash();
+          tx4.recentBlockhash = bh4.blockhash; tx4.feePayer = payer;
+          var sig4 = await provider.signAndSendTransaction(tx4);
+          await conn.confirmTransaction(sig4.signature, 'confirmed');
+        }
+
+        // Step 5 — revoke mint authority
+        if (doMint) {
+          setStatus('sts-create', '⏳ Step 5/5 — Revoking mint authority…', 'info');
+          var tx5 = new W3.Transaction().add(
+            SPL.createSetAuthorityInstruction(
+              mintKp.publicKey, payer, SPL.AuthorityType.MintTokens, null, [], SPL.TOKEN_PROGRAM_ID
+            )
+          );
+          var bh5 = await conn.getLatestBlockhash();
+          tx5.recentBlockhash = bh5.blockhash; tx5.feePayer = payer;
+          var sig5 = await provider.signAndSendTransaction(tx5);
+          await conn.confirmTransaction(sig5.signature, 'confirmed');
+        }
+
+        var mintAddr = mintKp.publicKey.toString();
+        var explorer = network === 'mainnet'
+          ? 'https://solscan.io/token/' + mintAddr
+          : 'https://solscan.io/token/' + mintAddr + '?cluster=devnet';
+
+        // Auto-fill other tabs
+        el('s-mint').value      = mintAddr;
+        el('s-decimals').value  = dec;
+        el('p-mint').value      = mintAddr;
+        el('l-mint').value      = mintAddr;
+        el('p-name').value      = name;
+        el('p-symbol').value    = sym;
+
+        setStatus('sts-create',
+          '✅ Token created successfully!<br>' +
+          'Mint: <code style="font-size:.76rem">' + mintAddr + '</code>' +
+          '<span class="copy-chip" onclick="copyText(\'' + mintAddr + '\')">Copy</span><br>' +
+          '<a class="view-link" href="' + explorer + '" target="_blank">View on Solscan ↗</a>',
+          'success');
+
+      } catch (e) {
+        console.error(e);
+        setStatus('sts-create', '❌ ' + (e.message || String(e)), 'error');
+      } finally {
+        btn.disabled = false; btn.textContent = 'Create Token';
+      }
+    }
+
+    // ── SEND TOKENS ───────────────────────────────────────────────
+    el('sendBtn').addEventListener('click', function () {
+      if (!walletPub) { setStatus('sts-send', 'Connect your wallet first.', 'error'); return; }
+      var mint = el('s-mint').value.trim();
+      var dec  = parseInt(el('s-decimals').value) || 6;
+      if (!mint) { setStatus('sts-send', 'Enter the token mint address.', 'error'); return; }
+
+      var addrEls = document.querySelectorAll('.r-addr');
+      var amtEls  = document.querySelectorAll('.r-amt');
+      var recips  = [];
+      for (var i = 0; i < addrEls.length; i++) {
+        var addr = addrEls[i].value.trim();
+        var amt  = parseFloat(amtEls[i].value);
+        if (!addr || isNaN(amt) || amt <= 0) {
+          setStatus('sts-send', 'Row ' + (i+1) + ': enter a valid wallet address and amount.', 'error');
+          return;
+        }
+        recips.push({ addr: addr, amt: amt });
+      }
+      if (!recips.length) { setStatus('sts-send', 'Add at least one recipient.', 'error'); return; }
+      sendTokens(mint, dec, recips);
+    });
+
+    async function sendTokens(mintAddr, dec, recips) {
+      var btn = el('sendBtn');
+      btn.disabled = true; btn.textContent = 'Sending…';
+      try {
+        var payer    = new W3.PublicKey(walletPub);
+        var mintPub  = new W3.PublicKey(mintAddr);
+        var srcAta   = await SPL.getAssociatedTokenAddress(mintPub, payer, false, SPL.TOKEN_PROGRAM_ID);
+
+        for (var i = 0; i < recips.length; i++) {
+          var r = recips[i];
+          setStatus('sts-send',
+            '⏳ (' + (i+1) + '/' + recips.length + ') Sending ' + r.amt + ' tokens to ' + abbr(r.addr) + '… approve in wallet',
+            'info');
+
+          var destPub  = new W3.PublicKey(r.addr);
+          var destAta  = await SPL.getAssociatedTokenAddress(mintPub, destPub, false, SPL.TOKEN_PROGRAM_ID);
+          var exists   = await conn.getAccountInfo(destAta);
+
+          var tx = new W3.Transaction();
+          if (!exists) {
+            tx.add(SPL.createAssociatedTokenAccountInstruction(payer, destAta, destPub, mintPub, SPL.TOKEN_PROGRAM_ID));
+          }
+          var sendAmt = BigInt(Math.round(r.amt * Math.pow(10, dec)));
+          tx.add(SPL.createTransferInstruction(srcAta, destAta, payer, sendAmt, [], SPL.TOKEN_PROGRAM_ID));
+
+          var bh = await conn.getLatestBlockhash();
+          tx.recentBlockhash = bh.blockhash; tx.feePayer = payer;
+          var res = await provider.signAndSendTransaction(tx);
+          await conn.confirmTransaction(res.signature, 'confirmed');
+        }
+
+        setStatus('sts-send',
+          '✅ Tokens sent to ' + recips.length + ' wallet' + (recips.length > 1 ? 's' : '') + ' successfully!',
+          'success');
+      } catch (e) {
+        console.error(e);
+        setStatus('sts-send', '❌ ' + (e.message || String(e)), 'error');
+      } finally {
+        btn.disabled = false; btn.textContent = 'Send Tokens';
+      }
+    }
+
+    // ── TOKEN PROFILE ─────────────────────────────────────────────
+    el('profileBtn').addEventListener('click', function () {
+      if (!walletPub) { setStatus('sts-profile', 'Connect your wallet first.', 'error'); return; }
+      var mint = el('p-mint').value.trim();
+      if (!mint) { setStatus('sts-profile', 'Enter your token mint address.', 'error'); return; }
+
+      var logoSrc   = el('p-logoimg').src   || '';
+      var bannerSrc = el('p-bannerimg').src || '';
+
+      var exts = {};
+      if (el('p-twitter').value.trim())   exts.twitter   = el('p-twitter').value.trim();
+      if (el('p-telegram').value.trim())  exts.telegram  = el('p-telegram').value.trim();
+      if (el('p-discord').value.trim())   exts.discord   = el('p-discord').value.trim();
+      if (el('p-instagram').value.trim()) exts.instagram = el('p-instagram').value.trim();
+
+      var meta = {
+        name:         el('p-name').value.trim(),
+        symbol:       el('p-symbol').value.trim(),
+        description:  el('p-desc').value.trim(),
+        image:        logoSrc.startsWith('data:')   ? 'REPLACE_WITH_IPFS_LOGO_URI'   : (logoSrc || ''),
+        banner:       bannerSrc.startsWith('data:') ? 'REPLACE_WITH_IPFS_BANNER_URI' : (bannerSrc || ''),
+        external_url: el('p-website').value.trim()
+      };
+      if (Object.keys(exts).length) meta.extensions = exts;
+
+      var json = JSON.stringify(meta, null, 2);
+
+      setStatus('sts-profile',
+        '<strong>📋 Metadata JSON is ready!</strong><br><br>' +
+        '<strong>Steps to publish on-chain:</strong><br>' +
+        '1. Upload logo &amp; banner images to <a href="https://nft.storage" target="_blank" style="color:var(--g)">nft.storage (free)</a> → copy the IPFS URIs<br>' +
+        '2. Replace <code>REPLACE_WITH_IPFS_*_URI</code> values in the JSON below<br>' +
+        '3. Upload the finished JSON file to IPFS → copy the metadata URI<br>' +
+        '4. Run <a href="https://metaboss.rs" target="_blank" style="color:var(--g)">Metaboss CLI</a>:<br>' +
+        '<code style="display:block;background:var(--inp);padding:.4rem .55rem;border-radius:6px;margin:.35rem 0;font-size:.74rem">metaboss update uri --mint ' + mint + ' --new-uri &lt;metadata-ipfs-uri&gt;</code>' +
+        '<pre class="json-block">' + escapeHtml(json) + '</pre>' +
+        '<span class="copy-chip" onclick="copyText(\'' + escAttr(json) + '\')">Copy JSON</span> ' +
+        '<span class="copy-chip" onclick="downloadJson(\'' + escAttr(json) + '\')">⬇ Download JSON</span>',
+        'info');
+    });
+
+    // ── LIQUIDITY ─────────────────────────────────────────────────
+    el('liqBtn').addEventListener('click', function () {
+      if (!walletPub) { setStatus('sts-liquidity', 'Connect your wallet first.', 'error'); return; }
+      var mint = el('l-mint').value.trim();
+      var tok  = parseFloat(el('l-tokens').value);
+      var sol  = parseFloat(el('l-sol').value);
+      if (!mint || !tok || !sol || tok <= 0 || sol <= 0) {
+        setStatus('sts-liquidity', 'Please fill in all three fields.', 'error'); return;
+      }
+      setStatus('sts-liquidity',
+        'ℹ️ Raydium pool creation requires their own SDK and cannot run directly in a browser without a backend.<br>' +
+        'Visit <a href="https://raydium.io/liquidity/create-pool/" target="_blank" style="color:var(--g)">raydium.io → Create Pool ↗</a> and paste your mint address:<br>' +
+        '<code style="font-size:.76rem">' + mint + '</code>' +
+        '<span class="copy-chip" onclick="copyText(\'' + mint + '\')">Copy</span>',
+        'info');
+    });
+
+  } // end initApp
+
+  // ── GLOBAL UTILS ───────────────────────────────────────────────
+  window.removeRecipient = function (btn) {
+    var rows = document.querySelectorAll('.recip-row');
+    if (rows.length > 1) btn.closest('.recip-row').remove();
   };
 
-  // Remove empty extension fields
-  Object.keys(meta.extensions).forEach(function(k){
-    if(!meta.extensions[k]) delete meta.extensions[k];
-  });
+  window.copyText = function (text) {
+    navigator.clipboard.writeText(text)
+      .then(function () { alert('Copied!'); })
+      .catch(function () { prompt('Copy this:', text); });
+  };
 
-  var jsonStr=JSON.stringify(meta,null,2);
-  var safeJson=jsonStr.replace(/'/g,"\\'");
+  window.downloadJson = function (jsonStr) {
+    var blob = new Blob([jsonStr], { type: 'application/json' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'token-metadata.json';
+    a.click();
+    URL.revokeObjectURL(a.href);
+  };
 
-  showSts('profSts',
-    '<strong>📋 Metadata JSON ready!</strong><br><br>'+
-    '<strong>Steps to update on-chain:</strong><br>'+
-    '1. Upload your logo &amp; banner images to '+
-    '<a href="https://nft.storage" target="_blank" style="color:var(--g)">nft.storage</a> or '+
-    '<a href="https://pinata.cloud" target="_blank" style="color:var(--g)">Pinata</a> → get IPFS URIs<br>'+
-    '2. Replace <code>REPLACE_WITH_IPFS_URI_FOR_LOGO</code> and <code>REPLACE_WITH_IPFS_URI_FOR_BANNER</code> in the JSON below<br>'+
-    '3. Upload the final JSON to IPFS too → get metadata URI<br>'+
-    '4. Use <a href="https://metaboss.rs" target="_blank" style="color:var(--g)">Metaboss CLI</a>:<br>'+
-    '<code style="display:block;background:var(--inp);padding:.5rem;border-radius:6px;margin:.4rem 0;font-size:.76rem">'+
-    'metaboss update uri --keypair &lt;your-wallet.json&gt; --mint '+mint+' --new-uri &lt;metadata-ipfs-uri&gt;'+
-    '</code>'+
-    '<pre class="meta">'+escHTML(jsonStr)+'</pre>'+
-    '<span class="chip" onclick="cp(\''+safeJson.replace(/\n/g,'\\n')+'\')">Copy JSON</span> '+
-    '<span class="chip" onclick="downloadJSON(\''+safeJson.replace(/\n/g,'\\n')+'\')">Download JSON</span>',
-    'fo');
-};
-
-function escHTML(s){
-  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
-window.downloadJSON=function(jsonStr){
-  var blob=new Blob([jsonStr],{type:'application/json'});
-  var a=document.createElement('a');
-  a.href=URL.createObjectURL(blob);
-  a.download='token-metadata.json';
-  a.click();
-};
-
-/* ══════════════════════════════════
-   LIQUIDITY
-══════════════════════════════════ */
-$('liqBtn').onclick=function(){
-  if(!PUB){ showSts('liqSts','Connect your wallet first.','er'); return; }
-  var mint=$('lMint').value.trim();
-  var tok=parseFloat($('lTok').value);
-  var sol=parseFloat($('lSol').value);
-  if(!mint||!tok||!sol||tok<=0||sol<=0){ showSts('liqSts','Fill in all fields.','er'); return; }
-  showSts('liqSts',
-    'ℹ️ Raydium pool creation requires their SDK and can\'t run in a plain HTML file.<br>'+
-    'Go to <a href="https://raydium.io/liquidity/create-pool/" target="_blank" style="color:var(--g)">raydium.io → Create Pool ↗</a> and paste your mint:<br>'+
-    '<code style="font-size:.78rem">'+mint+'</code>'+
-    '<span class="chip" onclick="cp(\''+mint+'\')">Copy</span>',
-    'fo');
-};
-
-/* ══════════════════════════════════
-   UTILITIES
-══════════════════════════════════ */
-function sleep(ms){ return new Promise(function(r){ setTimeout(r,ms); }); }
-
-window.cp=function(txt){
-  navigator.clipboard.writeText(txt)
-    .then(function(){ alert('Copied!'); })
-    .catch(function(){ prompt('Copy:',txt); });
-};
+  function escapeHtml(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+  function escAttr(s) {
+    return s.replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/\r?\n/g,'\\n');
+  }
 
 })();
 </script>
